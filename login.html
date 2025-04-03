@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .logo {
+            height: 50px;
+            margin-right: 10px;
+        }
+
+        body {
+            font-family: system-ui;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="d-flex justify-content-between align-items-center shadow">
+         <!-- Logo -->
+         <nav class="navbar">
+            <a class="navbar-brand" href="/homepage.html">
+                <img src="/img/Logo.png" width="70" height="70"
+                    class="d-inline-block" alt="logo">
+                Asset Borrowing System
+            </a>
+        </nav>
+    </header>
+
+    <a href="homepage.html" class="position-absolute start-0 ms-5 my-5 text-black fw-bold fs-4">Back</a>
+
+    <div class="d-flex justify-content-center align-items-center vh-100">
+        <div class="card p-4 shadow" style="width: 350px;">
+            <div class="text-center">
+                <img src="/img/stuicon.jpg" alt="User Avatar" class="rounded-circle" width="80">
+                <h4 class="mt-2">LOGIN</h4>
+            </div>
+            <form id="form-login">
+                <input type="text" class="form-control mt-3" placeholder="Username" name="username">
+                <input type="password" class="form-control mt-3" placeholder="Password" name="password">
+                <button class="btn btn-dark w-100 mt-3">LOGIN</button>
+            </form>
+            <p class="text-center mt-2">Need an account? <a href="../register.html" class="text-black">Register here</a>
+            </p>
+        </div>
+    </div>
+        <script src="/js/login.js"></script>
+        <script src="/js/sweetalert2@11"></script>
+</body>
+
+</html>

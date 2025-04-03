@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Staff pickup list</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+    .sidebar {
+      height: 100vh;
+      width: 250px;
+      position: fixed;
+      left: -250px;
+      top: 0;
+      background: #fff;
+      transition: all 0.3s;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+      z-index: 999;
+    }
+
+    .sidebar.active {
+      left: 0;
+      width: 250px;
+    }
+
+    .sidebar .nav-link {
+      color: #000;
+    }
+
+    .content {
+      transition: margin-left 0.3s;
+      margin-left: 0;
+    }
+
+    /* .content.shifted {
+      margin-left: 250px;
+    } */
+
+    .profile-img {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .card {
+      background-color: #ddd;
+      border: 1px solid #ddd;
+    }
+
+    .search-bar .input-group {
+      border-radius: 30px;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .search-bar .form-control {
+      border: none;
+      padding-left: 20px;
+    }
+
+    .search-bar .btn {
+      border: none;
+      padding: 10px 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar bg-white shadow rounded-end-5 d-flex flex-column justify-content-between fs-5" id="sidebar"
+    style="height: 500px">
+    <div>
+      <ul class="nav flex-column p-3 nav-tabs">
+        <li class="nav-item">
+          <a class="nav-link" href="/staff/home"><i class="fas fa-home me-2"></i> Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/staff/asset"><i class="fas fa-box-open me-2"></i> Asset List</a>
+        <li class="nav-item">
+          <a class="nav-link" href="/staff/dashboard"><i class="fas fa-table me-2"></i> Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/staff/return"><i class="fas fa-history me-2"></i> Return Item</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link disabled" href="/staff/pickup"><i class="fas fa-history me-2"></i> Pickup Item</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/staff/news"><i class="fas fa-newspaper me-2"></i> Add News</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/staff/history"><i class="fas fa-history me-2"></i> History</a>
+        </li>
+
+      </ul>
+    </div>
+    <div class="p-3 border-top">
+      <button class="nav-link text-dark bg-transparent border-0" id="logoutBtn">
+        <i class="fas fa-sign-out-alt me-2"></i> Logout
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="content mt-3" id="main-content">
+    <nav class="navbar navbar-light bg-white shadow-sm px-3">
+      <button class="btn btn-outline-secondary" id="toggle-btn">
+        <i class="fas fa-bars"></i>
+      </button>
+      <span class="navbar-brand ms-3 fs-4">Asset Borrowing System</span>
+      <div class="ms-auto d-flex align-items-center">
+        <i class="fas fa-bell me-3"></i>
+        <img src="/img/stuicon.jpg" class="profile-img" alt="Profile" />
+      </div>
+    </nav>
+    <div class="container mt-4">
+      <div class="d-flex justify-content-between align-items-center">
+        <h1 class="fw-bold">Pickup Items</h1>
+      </div>
+      <!-- Pill-style Header -->
+      <div class="d-flex bg-dark text-white rounded-pill px-4 py-2 mt-3 align-items-center w-100">
+        <div class="col-1 text-center fw-bold">ID</div>
+        <div class="col-1 text-center fw-bold"></div>
+        <div class="col-2 text-center fw-bold">Asset Name</div>
+        <div class="col-2 text-center fw-bold">Borrower</div>
+        <div class="col-2 text-center fw-bold">Approved By</div>
+        <div class="col-2 text-center fw-bold">Return Date</div>
+        <div class="col-2 text-center fw-bold"></div>
+      </div>
+
+      <!-- Pickup Items -->
+      <div id="pickup-items"></div>
+    </div>
+  </div>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="/js/sweetalert2@11"></script>
+  <script src="/js/logout.js"></script>
+  <script src="/js/staff_pickup_item.js"></script>
+</body>
+
+</html>

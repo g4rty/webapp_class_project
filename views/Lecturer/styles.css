@@ -1,0 +1,116 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+.top-bar {
+    display: flex;
+    align-items: center; /* จัดให้อยู่กึ่งกลางแนวตั้ง */
+    justify-content: center; /* จัดให้อยู่กึ่งกลางแนวนอน */
+    background: #D9D9D9;
+    color: rgb(5, 5, 5);
+    padding: 15px;
+    position: relative; /* ใช้สำหรับจัดตำแหน่งโปรไฟล์ */
+}
+.profile {
+    position: absolute;
+    right: 20px; /* ให้โปรไฟล์อยู่ขวา */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.profile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+.container {
+    display: flex;
+    margin-top: 0px; /* ทำให้ main-content และ sidebar ไม่ทับ header */
+}
+
+.sidebar {
+    width: 200px;
+    background: #f9f2f2;
+    padding: 20px;
+    height: 100vh;
+    position: fixed;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    margin: 15px 0;
+}
+
+.sidebar ul li a {
+    text-decoration: none;
+    color: black;
+    display: block;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.sidebar ul li a.active, .sidebar ul li a:hover {
+    background: #ffffff;
+}
+
+.logout {
+    display: block;
+    text-decoration: none;
+    color: black;
+    margin-top: 20px;
+    padding: 10px;
+    background: #f9f2f2;
+    text-align: center;
+    border-radius: 5px;
+}
+
+.main-content {
+    margin-left: 270px;
+    flex-grow: 1;
+    padding: 20px;
+}
+
+.banner {
+    background: #D9D9D9;
+    height: 200px;
+    margin: 20px 0;
+    border-radius: 10px;
+}
+
+footer {
+    text-align: center;
+    padding: 10px;
+    background: #D9D9D9;
+    border-radius: 5px;
+    margin-top: 20px;
+}
+.news {
+    text-align: center; /* จัดข้อความตรงกลาง */
+    margin-top: 20px; /* เพิ่มระยะห่างด้านบน */
+    padding: 20px 0; /* เพิ่มระยะห่างด้านบนและด้านล่าง */
+}
+
+.news h2 {
+    margin-bottom: 20px; /* เพิ่มระยะห่างใต้หัวข้อ */
+}
+
+.news-items {
+    display: flex;
+    justify-content: center; /* จัดให้อยู่ตรงกลาง */
+    gap: 50px; /* เพิ่มระยะห่างระหว่างกล่อง */
+    margin-top: 10px; /* เพิ่มระยะห่างด้านบนของกล่องข่าว */
+}
+
+.news-box {
+    width: 300px;
+    height: 150px;
+    background: #D9D9D9;
+    border-radius: 10px;
+}

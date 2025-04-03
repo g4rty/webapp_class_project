@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Asset Borrowing System</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet" />
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+    <style>
+      .sidebar {
+        height: 100vh;
+        width: 250px;
+        position: fixed;
+        left: -250px;
+        top: 0;
+        background: #fff;
+        transition: all 0.3s;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        z-index: 999;
+      }
+
+      .sidebar.active {
+        left: 0;
+        width: 250px;
+      }
+
+      .sidebar .nav-link {
+        color: #000;
+      }
+
+      .content {
+        transition: margin-left 0.3s;
+        margin-left: 0;
+      }
+
+      .content.shifted {
+        margin-left: 250px;
+      }
+
+      .carousel-item {
+        height: 300px;
+        background: #d3d3d3;
+      }
+
+      .profile-img {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+      .image-grid {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px auto;
+        }
+
+        .image-grid img {
+            width: 300px;
+            height: 200px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+    </style>
+  </head>
+
+  <body>
+    <!-- Sidebar -->
+    <div class="sidebar bg-white shadow rounded-end-5 d-flex flex-column justify-content-between fs-5" id="sidebar"
+    style="height: 500px">
+    <div>
+      <ul class="nav flex-column p-3 nav-tabs">
+        <li class="nav-item">
+          <a class="nav-link disabled" href="/staff/home"><i class="fas fa-home me-2"></i> Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/staff/asset"><i class="fas fa-box-open me-2"></i> Asset List</a>
+        <li class="nav-item">
+          <a class="nav-link" href="/staff/dashboard"><i class="fas fa-table me-2"></i> Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/staff/return"><i class="fas fa-history me-2"></i> Return Item</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/staff/pickup"><i class="fas fa-history me-2"></i> Pickup Item</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/staff/news"><i class="fas fa-newspaper me-2"></i> Add News</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/staff/history"><i class="fas fa-history me-2"></i> History</a>
+        </li>
+
+      </ul>
+    </div>
+
+      <!-- Logout pinned to bottom -->
+      <div class="p-3 border-top">
+        <button class="nav-link text-dark bg-transparent border-0" id="logoutBtn">
+          <i class="fas fa-sign-out-alt me-2"></i> Logout
+        </button>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content" id="main-content">
+      <!-- Navbar -->
+      <nav class="navbar navbar-light bg-white shadow-sm px-3">
+        <button class="btn btn-outline-secondary" id="toggle-btn">
+          <i class="fas fa-bars"></i>
+        </button>
+        <span class="navbar-brand ms-3 fs-4">Asset Borrowing System</span>
+        <div class="ms-auto d-flex align-items-center">
+          <i class="fas fa-bell me-3"></i>
+          <img src="/img/stuicon.jpg" class="profile-img" alt="Profile" />
+          
+        </div>
+      </nav>
+
+      <!-- Carousel -->
+      <div class="container mt-4">
+        <div
+          id="carouselExampleIndicators"
+          class="carousel slide"
+          data-bs-ride="carousel"
+        >
+          <div class="carousel-indicators">
+            <button
+              type="button"
+              data-bs-target="#carouselExampleIndicators"
+              data-bs-slide-to="0"
+              class="active"
+            ></button>
+            <button
+              type="button"
+              data-bs-target="#carouselExampleIndicators"
+              data-bs-slide-to="1"
+            ></button>
+            <button
+              type="button"
+              data-bs-target="#carouselExampleIndicators"
+              data-bs-slide-to="2"
+            ></button>
+          </div>
+          <div class="carousel-inner">
+            <div class="carousel-item active"></div>
+            <div class="carousel-item"></div>
+            <div class="carousel-item"></div>
+          </div>
+        </div>
+
+        <h1 class="fw-bold mt-3">What's news</h1>
+        <div class="image-grid" id="news-container">
+      </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="/js/bootstrap.bundle.min.js"></script>
+    <script>
+      const toggleBtn = document.getElementById("toggle-btn");
+      const sidebar = document.getElementById("sidebar");
+      const content = document.getElementById("main-content");
+
+      toggleBtn.addEventListener("click", () => {
+        sidebar.classList.toggle("active");
+        content.classList.toggle("shifted");
+      });
+      
+  fetch("/news")
+    .then(res => res.json())
+    .then(newsList => {
+      const container = document.getElementById("news-container");
+      container.innerHTML = "";
+
+      const count = Math.max(newsList.length, 3); // Always show 3 cards
+
+      for (let i = 0; i < count; i++) {
+        const news = newsList[i];
+        const imageUrl = news?.image ? `/img/${news.image}` : "https://via.placeholder.com/300x200?text=No+News";
+
+        const img = document.createElement("img");
+        img.src = imageUrl;
+        img.alt = `News ${i + 1}`;
+        container.appendChild(img);
+      }
+    })
+    .catch(err => {
+      console.error("Error loading news images:", err);
+    });
+    </script>
+    <script src="/js/sweetalert2@11"></script>
+    <script src="/js/logout.js"></script>
+  </body>
+</html>
