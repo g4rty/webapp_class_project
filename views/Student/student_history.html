@@ -74,44 +74,32 @@
     style="height: 500px">
     <div class="">
       <ul class="nav flex-column p-3 nav-tabs">
-        <li class="nav-item">
-          <a class="nav-link" href="/student/home"><i class="fas fa-home me-2"></i> Home</a>
+        <li class="nav-item"><a class="nav-link" href="/student/home"><i class="fas fa-home me-2"></i> Home</a></li>
+        <li class="nav-item"><a class="nav-link" href="/student/assets"><i class="fas fa-table me-2"></i> Asset List</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/student/assets"><i class="fas fa-table me-2"></i> Asset List</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/student/request"><i class="fas fa-box-open me-2"></i> My
-            Request</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link disabled" href="/student/history"><i class="fas fa-history me-2"></i>
-            History</a>
-        </li>
+        <li class="nav-item"><a class="nav-link" href="/student/request"><i class="fas fa-box-open me-2"></i> My
+            Request</a></li>
+        <li class="nav-item"><a class="nav-link disabled" href="/student/history"><i class="fas fa-history me-2"></i>
+            History</a></li>
       </ul>
     </div>
     <div class="p-3 border-top">
-      <button class="nav-link text-dark bg-transparent border-0" id="logoutBtn">
-        <i class="fas fa-sign-out-alt me-2"></i> Logout
-      </button>
+      <button class="nav-link text-dark bg-transparent border-0" id="logoutBtn"><i class="fas fa-sign-out-alt me-2"></i>
+        Logout</button>
     </div>
   </div>
 
   <!-- Main Content -->
   <div class="content" id="main-content">
     <nav class="navbar navbar-light bg-white shadow-sm px-3">
-      <button class="btn btn-outline-secondary" id="toggle-btn">
-        <i class="fas fa-bars"></i>
-      </button>
+      <button class="btn btn-outline-secondary" id="toggle-btn"><i class="fas fa-bars"></i></button>
       <span class="navbar-brand ms-3 fs-4">Asset Borrowing System</span>
-      <div class="ms-auto d-flex align-items-center">
-      </div>
+      <div class="ms-auto d-flex align-items-center"></div>
     </nav>
     <div class="container mt-4">
       <div class="d-flex justify-content-between align-items-center">
         <h1 class="mb-4 fw-bold">History</h1>
       </div>
-
       <div class="row bg-dark text-white rounded-pill px-4 py-2 mb-4 mt-3 text-center">
         <div class="col fw-bold">ID</div>
         <div class="col fw-bold"></div>
@@ -120,13 +108,11 @@
         <div class="col fw-bold">Returned Date</div>
         <div class="col fw-bold">Status of borrowing</div>
       </div>
-
       <div id="request-items"></div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Fixed Bootstrap -->
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     const toggleBtn = document.getElementById("toggle-btn");
@@ -138,20 +124,19 @@
       content.classList.toggle("shifted");
     });
 
-    function loadHistory() {
-      const userId = localStorage.getItem("userId");
-      if (!userId) {
-        Swal.fire({
-          icon: "warning",
-          title: "Not Logged In",
-          text: "Please log in first.",
-          confirmButtonText: "Go to Login"
-        }).then(() => {
-          window.location.replace("/login");
-        });
-        return;
-      }
-
+    // Authentication check
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      Swal.fire({
+        icon: "error",
+        title: "Unauthorized",
+        text: "You are not logged in.",
+        confirmButtonText: "Go to Login"
+      }).then(() => {
+        window.location.href = "/login";
+      });
+    } else {
+      // Proceed with loading history if logged in
       fetch(`/history?role=student&userId=${userId}`)
         .then(response => response.json())
         .then(items => {
@@ -171,16 +156,13 @@
               : date.toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" });
           }
 
-          const today = new Date().setHours(0,0,0,0);
+          const today = new Date();
 
           items.forEach(item => {
             const isReturned = item.handover_by_id && item.receiver_id;
             const isWaitingTakeout = item.status === "approved" && !item.handover_by_id;
             const isWaitingReturn = item.status === "approved" && item.handover_by_id && !item.receiver_id;
-            const isOverdue =
-              item.return_date &&
-              !isReturned &&
-              new Date(item.return_date).setHours(0, 0, 0, 0) < today
+            const isOverdue = item.return_date && !isReturned && new Date(item.return_date).setHours(0, 0, 0, 0) < today.setHours(0, 0, 0, 0);
 
             const statusLabel = isReturned
               ? "Successfully Returned"
@@ -205,23 +187,21 @@
             const row = document.createElement("div");
             row.className = "d-flex bg-light rounded shadow-sm p-3 mb-3 align-items-center text-center w-100";
             row.innerHTML = `
-          <div class="col fw-semibold">${item.id}</div>
-          <div class="col d-flex justify-content-center">
-            <img src="/img/${item.image}" class="img-fluid rounded" style="width: 80px; height: auto;" alt="${item.name}">
-          </div>
-          <div class="col d-flex align-items-center justify-content-center fw-medium">${item.name}</div>
-          <div class="col flex-grow-1 d-flex justify-content-center align-items-center">
-            <span class="badge text-dark">${formatDate(item.borrow_date)}</span>
-          </div>
-          <div class="col d-flex justify-content-center align-items-center">
-            <span class="badge text-dark">${item.returned_date === "0000-00-00" ? "Not Returned" : formatDate(item.returned_date)}</span>
-          </div>
-          <div class="col d-flex justify-content-center align-items-center">
-            <span class="badge text-white ${badgeClass}">
-              ${statusLabel}
-            </span>
-          </div>
-        `;
+              <div class="col fw-semibold">${item.id}</div>
+              <div class="col d-flex justify-content-center">
+                <img src="/img/${item.image}" class="img-fluid rounded" style="width: 80px; height: auto;" alt="${item.name}">
+              </div>
+              <div class="col d-flex align-items-center justify-content-center fw-medium">${item.name}</div>
+              <div class="col flex-grow-1 d-flex justify-content-center align-items-center">
+                <span class="badge text-dark">${formatDate(item.borrow_date)}</span>
+              </div>
+              <div class="col d-flex justify-content-center align-items-center">
+                <span class="badge text-dark">${item.returned_date === "0000-00-00" ? "Not Returned" : formatDate(item.returned_date)}</span>
+              </div>
+              <div class="col d-flex justify-content-center align-items-center">
+                <span class="badge text-white ${badgeClass}">${statusLabel}</span>
+              </div>
+            `;
             container.appendChild(row);
           });
         })
@@ -234,10 +214,6 @@
           });
         });
     }
-
-
-    loadHistory(); // Call it immediately
-
   </script>
   <script src="/js/logout.js"></script>
 </body>
