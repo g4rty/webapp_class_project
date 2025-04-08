@@ -80,8 +80,8 @@
         }
 
         .image-grid img {
-            width: 300px;
-            height: 200px;
+            width: 500px;
+            height: 300px;
             border-radius: 10px;
             object-fit: cover;
         }
@@ -101,7 +101,7 @@
     <header class="d-flex justify-content-between align-items-center shadow">
         <!-- Logo -->
         <nav class="navbar">
-            <a class="navbar-brand" href="/homepage.html">
+            <a class="navbar-brand" href="/">
                 <img src="/img/Logo.png" width="70" height="70"
                     class="d-inline-block" alt="logo">
                 Asset Borrowing System
@@ -116,21 +116,18 @@
     <div class="carousel">
         <div class="carousel-images">
             <img src="/img/home1.png" alt="Slide 1">
-            <img src="/img/home2.png" alt="Slide 2">
-            <img src="/img/home3.png" alt="Slide 3">
+            <img src="/img/rule.png" alt="Slide 3">
         </div>
     </div>
     <div class="indicators">
         <span class="indicator active" onclick="moveToSlide(0)"></span>
         <span class="indicator" onclick="moveToSlide(1)"></span>
-        <span class="indicator" onclick="moveToSlide(2)"></span>
     </div>
 
-    <div class="image-grid">
-        <img src="/img/blackscreen.jpg" alt="Grid Image 1">
-        <img src="/img/blackscreen.jpg" alt="Grid Image 2">
-        <img src="/img/blackscreen.jpg" alt="Grid Image 3">
-    </div>
+
+    <div class="container">
+        <div class="image-grid" id="news-container"></div>
+      </div>
 
     <footer class="bg-dark text-white py-4 mt-5">
     <div class="container text-center">
@@ -141,6 +138,27 @@
     </footer>
     
     <script>
+        fetch("/news")
+    .then(res => res.json())
+    .then(newsList => {
+      const container = document.getElementById("news-container");
+      container.innerHTML = "";
+
+      const count = Math.max(newsList.length, 3); // Always show 3 cards
+
+      for (let i = 0; i < count; i++) {
+        const news = newsList[i];
+        const imageUrl = news?.image ? `/img/${news.image}` : "https://via.placeholder.com/300x200?text=No+News";
+
+        const img = document.createElement("img");
+        img.src = imageUrl;
+        img.alt = `News ${i + 1}`;
+        container.appendChild(img);
+      }
+    })
+    .catch(err => {
+      console.error("Error loading news images:", err);
+    });
         let currentSlide = 0;
         const slides = document.querySelectorAll(".carousel img");
         const indicators = document.querySelectorAll(".indicator");
