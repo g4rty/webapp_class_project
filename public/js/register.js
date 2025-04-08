@@ -26,7 +26,7 @@ registerForm.onsubmit = async function (e) {
                 icon: "success",
                 confirmButtonText: "Okay"
             }).then(() => {
-                window.location.replace('/login.html');
+                window.location.replace('/login');
             });
         } else if (response.status === 409) {
             throw new Error("Username or email already exists");
