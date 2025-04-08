@@ -677,13 +677,12 @@ app.put("/borrow/:id/reject", (req, res) => {
 //     });
 // }
 // );
-
 app.get("/history", (req, res) => {
     const role = req.query.role;
-    const userId = req.query.userId;
+    const userId = parseInt(req.query.userId);
 
-    if (!role || !userId) {
-        return res.status(400).json({ error: "Missing role or userId" });
+    if (!role || isNaN(userId)) {
+        return res.status(400).json({ error: "Missing or invalid role or userId" });
     }
 
     let sql = "";
@@ -737,6 +736,9 @@ app.get("/history", (req, res) => {
                 br.return_date,
                 br.returned_date,
                 br.status,
+                br.approve_by_id,
+                br.receiver_id,
+                br.handover_by_id,
                 u.username AS approved_by
             FROM borrow_requests br
             JOIN assets a ON br.asset_id = a.id
@@ -872,33 +874,35 @@ app.post("/handover/:id", (req, res) => {
 
 app.get("/handover-requests", (req, res) => {
     const sql = `
-    SELECT 
-      br.id AS request_id,
-      a.name AS asset_name,
-      a.image AS asset_image,
-      u.username AS borrower,
-      br.borrow_date,
-      br.return_date,
-      br.reason,
-      br.handover_by_id,
-      br.approve_by_id
-    FROM borrow_requests br
-    JOIN assets a ON br.asset_id = a.id
-    JOIN users u ON br.borrower_id = u.id
-    WHERE br.status = 'approved' AND br.handover_by_id = 0 AND br.approve_by_id IS NOT NULL
-    ORDER BY br.borrow_date DESC
-  `;
-
+      SELECT 
+        br.id AS request_id,
+        a.name AS asset_name,
+        a.image AS asset_image,
+        u.username AS borrower,
+        br.borrow_date,
+        br.return_date,
+        br.reason,
+        br.handover_by_id,
+        br.approve_by_id
+      FROM borrow_requests br
+      JOIN assets a ON br.asset_id = a.id
+      JOIN users u ON br.borrower_id = u.id
+      WHERE br.status = 'approved' 
+        AND (br.handover_by_id IS NULL OR br.handover_by_id = 0)
+        AND br.approve_by_id IS NOT NULL
+      ORDER BY br.borrow_date DESC
+    `;
+  
     con.query(sql, (err, results) => {
-        if (err) {
-            console.error("Error fetching handover requests:", err);
-            return res.status(500).json({ error: "Failed to fetch handover requests" });
-        }
-
-        return res.status(200).json(results);
+      if (err) {
+        console.error("Error fetching handover requests:", err);
+        return res.status(500).json({ error: "Failed to fetch handover requests" });
+      }
+  
+      return res.status(200).json(results);
     });
-});
-
+  });
+  
 // ##################################################################################################################
 // return
 // ##################################################################################################################
@@ -919,21 +923,21 @@ app.get("/return-requests", (req, res) => {
       JOIN assets a ON br.asset_id = a.id
       JOIN users u ON br.borrower_id = u.id
       WHERE br.status = 'approved'
-        AND br.handover_by_id != 0
-        AND br.receiver_id = 0
+        AND (br.handover_by_id IS NOT NULL AND br.handover_by_id != 0)
+        AND (br.receiver_id IS NULL OR br.receiver_id = 0)
       ORDER BY br.borrow_date DESC
     `;
-
+  
     con.query(sql, (err, results) => {
-        if (err) {
-            console.error("Error fetching return requests:", err);
-            return res.status(500).json({ error: "Failed to fetch return requests" });
-        }
-
-        return res.status(200).json(results);
+      if (err) {
+        console.error("Error fetching return requests:", err);
+        return res.status(500).json({ error: "Failed to fetch return requests" });
+      }
+  
+      return res.status(200).json(results);
     });
-});
-
+  });
+  
 app.post("/return/:id", (req, res) => {
     const requestId = parseInt(req.params.id);
     const { userId } = req.body;
