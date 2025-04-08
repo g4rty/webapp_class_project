@@ -362,43 +362,62 @@ app.post("/borrow", (req, res) => {
         return res.status(400).json({ error: "Missing required fields" });
     }
 
-    //  Check if a request already exists today for this asset + user
-    const checkSql = `
+    // Step 1: Check if the student already has an active request
+    const activeRequestSql = `
       SELECT id FROM borrow_requests 
-      WHERE asset_id = ? AND borrower_id = ? AND borrow_date = ?
+      WHERE borrower_id = ? 
+      AND (status = 'pending' OR (status = 'approved' AND (receiver_id IS NULL OR receiver_id = 0)))
     `;
 
-    con.query(checkSql, [item_id, borrower_id, today], (err, results) => {
+    con.query(activeRequestSql, [borrower_id], (err, activeResults) => {
         if (err) {
-            console.error("Check error:", err);
-            return res.status(500).json({ error: "Database error during duplicate check" });
+            console.error("Active request check error:", err);
+            return res.status(500).json({ error: "Database error during active request check" });
         }
 
-        if (results.length > 0) {
-            return res.status(409).json({ error: "You've already requested this item today." });
+        if (activeResults.length > 0) {
+            return res.status(409).json({ error: "You can only request one item at a time. Cancel or complete your current request first." });
         }
 
-        // Insert if not duplicated
-        const insertSql = `
-            INSERT INTO borrow_requests 
-            (asset_id, borrower_id, borrow_date, return_date, request_date, reason, status) 
-            VALUES (?, ?, ?, ?, ?, ?, 'pending')
+        // Step 2: Check if this specific item was already requested today and not cancelled
+        const checkSql = `
+          SELECT id FROM borrow_requests 
+          WHERE asset_id = ? AND borrower_id = ? AND borrow_date = ? 
+          AND status != 'cancelled'
         `;
 
-        con.query(insertSql, [item_id, borrower_id, today, tomorrowStr, today, reason], (err, result) => {
+        con.query(checkSql, [item_id, borrower_id, today], (err, results) => {
             if (err) {
-                console.error("Insert error:", err);
-                return res.status(500).json({ error: "Database insert failed" });
+                console.error("Check error:", err);
+                return res.status(500).json({ error: "Database error during duplicate check" });
             }
 
-            // Reduce quantity in assets table
-            const updateQtySql = `UPDATE assets SET quantity = quantity - 1 WHERE id = ? AND quantity > 0`;
+            if (results.length > 0) {
+                return res.status(409).json({ error: "You've already requested this item today." });
+            }
 
-            con.query(updateQtySql, [item_id], (err) => {
+            // Step 3: Insert the new request
+            const insertSql = `
+                INSERT INTO borrow_requests 
+                (asset_id, borrower_id, borrow_date, return_date, request_date, reason, status) 
+                VALUES (?, ?, ?, ?, ?, ?, 'pending')
+            `;
+
+            con.query(insertSql, [item_id, borrower_id, today, tomorrowStr, today, reason], (err, result) => {
                 if (err) {
-                    console.warn("Quantity update warning:", err);
+                    console.error("Insert error:", err);
+                    return res.status(500).json({ error: "Database insert failed" });
                 }
-                return res.status(200).json({ message: "Request submitted successfully." });
+
+                // Step 4: Reduce quantity in assets table
+                const updateQtySql = `UPDATE assets SET quantity = quantity - 1 WHERE id = ? AND quantity > 0`;
+
+                con.query(updateQtySql, [item_id], (err) => {
+                    if (err) {
+                        console.warn("Quantity update warning:", err);
+                    }
+                    return res.status(200).json({ message: "Request submitted successfully." });
+                });
             });
         });
     });
