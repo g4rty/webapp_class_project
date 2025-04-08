@@ -180,7 +180,7 @@
             const isOverdue =
               item.return_date &&
               !isReturned &&
-              new Date(item.return_date) < today;
+              new Date(item.return_date).setHours(0, 0, 0, 0) < today.setHours(0, 0, 0, 0)
 
             const statusLabel = isReturned
               ? "Successfully Returned"
@@ -188,7 +188,7 @@
                 ? "Waiting for Takeout"
                 : isWaitingReturn
                   ? isOverdue
-                    ? "⚠️ Overdue - Waiting for Return"
+                    ? "Overdue - Waiting for Return"
                     : "Waiting for Return"
                   : item.status.charAt(0).toUpperCase() + item.status.slice(1);
 
