@@ -677,6 +677,7 @@ app.put("/borrow/:id/reject", (req, res) => {
 //     });
 // }
 // );
+
 app.get("/history", (req, res) => {
     const role = req.query.role;
     const userId = parseInt(req.query.userId);
@@ -758,8 +759,6 @@ app.get("/history", (req, res) => {
         res.status(200).json(results);
     });
 });
-
-
 
 // ########################################################
 // toggle status
