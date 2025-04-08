@@ -73,46 +73,33 @@
   <div class="sidebar bg-white shadow rounded-end-5 d-flex flex-column justify-content-between fs-5" id="sidebar"
     style="height: 500px">
     <div class="">
-      <!-- Top navigation links -->
       <ul class="nav flex-column p-3 nav-tabs">
-        <li class="nav-item">
-          <a class="nav-link" href="/student/home"><i class="fas fa-home me-2"></i> Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link disabled" href="/student/assets"><i class="fas  fa-table me-2"></i> Asset
-            List</a>
-        <li class="nav-item">
-          <a class="nav-link" href="/student/request"><i class="fas fa-box-open me-2"></i> My Request</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/student/history"><i class="fas fa-history me-2"></i> History</a>
+        <li class="nav-item"><a class="nav-link" href="/student/home"><i class="fas fa-home me-2"></i> Home</a></li>
+        <li class="nav-item"><a class="nav-link disabled" href="/student/assets"><i class="fas fa-table me-2"></i> Asset
+            List</a></li>
+        <li class="nav-item"><a class="nav-link" href="/student/request"><i class="fas fa-box-open me-2"></i> My
+            Request</a></li>
+        <li class="nav-item"><a class="nav-link" href="/student/history"><i class="fas fa-history me-2"></i> History</a>
         </li>
       </ul>
     </div>
     <div class="p-3 border-top">
-      <button class="nav-link text-dark bg-transparent border-0" id="logoutBtn">
-        <i class="fas fa-sign-out-alt me-2"></i> Logout
-      </button>
+      <button class="nav-link text-dark bg-transparent border-0" id="logoutBtn"><i class="fas fa-sign-out-alt me-2"></i>
+        Logout</button>
     </div>
   </div>
 
   <!-- Main Content -->
   <div class="content" id="main-content">
     <nav class="navbar navbar-light bg-white shadow-sm px-3">
-      <button class="btn btn-outline-secondary" id="toggle-btn">
-        <i class="fas fa-bars"></i>
-      </button>
+      <button class="btn btn-outline-secondary" id="toggle-btn"><i class="fas fa-bars"></i></button>
       <span class="navbar-brand ms-3 fs-4">Asset Borrowing System</span>
-      <div class="ms-auto d-flex align-items-center">
-      </div>
+      <div class="ms-auto d-flex align-items-center"></div>
     </nav>
     <div class="container mt-4">
       <div class="d-flex justify-content-between align-items-center">
         <h1 class="fw-bold">Asset List</h1>
-        <!--search bar-->
       </div>
-
-      <!-- Pill-style Header -->
       <div class="d-flex bg-dark text-white rounded-pill px-4 py-2 mb-4 mt-3 align-items-center">
         <div class="col-1 text-center fw-bold">ID</div>
         <div class="col-1 text-center fw-bold"></div>
@@ -120,17 +107,12 @@
         <div class="col-3 text-center fw-bold">Status</div>
         <div class="col-5 text-center fw-bold"></div>
       </div>
-
-      <!-- Container for dynamic rows -->
       <div id="request-items"></div>
-
     </div>
   </div>
 
-  <!-- JavaScript section -->
   <script src="/js/bootstrap.bundle.min.js"></script>
-  <script src="/js/sweetalert2@11"></script> <!-- ✅ Added SweetAlert2 -->
-
+  <script src="/js/sweetalert2@11"></script>
   <script>
     const toggleBtn = document.getElementById("toggle-btn");
     const sidebar = document.getElementById("sidebar");
@@ -141,121 +123,131 @@
       content.classList.toggle("shifted");
     });
 
-    fetch("/assets")
-      .then((res) => res.json())
-      .then((items) => {
+    // Authentication check
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      Swal.fire({
+        icon: "error",
+        title: "Unauthorized",
+        text: "You are not logged in.",
+        confirmButtonText: "Go to Login"
+      }).then(() => {
+        window.location.href = "/login";
+      });
+    } else {
+      // Proceed with fetching assets if logged in
+      fetch("/assets")
+        .then((res) => res.json())
+        .then((items) => {
+          const container = document.getElementById("request-items");
+          const role = localStorage.getItem("role");
+          const borrower_id = parseInt(userId);
+          container.innerHTML = "";
 
-        const container = document.getElementById("request-items");
-        const role = localStorage.getItem("role"); 
-        const borrower_id = parseInt(localStorage.getItem("userId"));
-        container.innerHTML = "";
+          for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            const displayStatus = item.quantity === 0 ? "Borrowed" : item.status;
+            const row = document.createElement("div");
+            row.className = "d-flex bg-light rounded shadow-sm p-3 mb-3 align-items-center w-100";
+            let statusColor = displayStatus === "Available" ? "bg-primary" : "bg-secondary";
+            const isRequestDisabled = (role === "student" && item.quantity === 0) || item.status !== "Available";
 
-        for (let i = 0; i < items.length; i++) {
-          const item = items[i];
-          const displayStatus = item.quantity === 0 ? "Borrowed" : item.status; // Show "Borrowed" if quantity is 0
-          const row = document.createElement("div");
-          row.className = "d-flex bg-light rounded shadow-sm p-3 mb-3 align-items-center w-100";
-          let statusColor = displayStatus === "Available" ? "bg-primary" : "bg-secondary"; // Adjust button color based on displayed status
-          const isRequestDisabled = (role === "student" && item.quantity === 0) || item.status !== "Available";
-
-          row.innerHTML = `
-            <div class="col-1 text-center fw-semibold">${item.id}</div>
-            <div class="col-1 d-flex justify-content-center">
+            row.innerHTML = `
+              <div class="col-1 text-center fw-semibold">${item.id}</div>
+              <div class="col-1 d-flex justify-content-center">
                 <img src="/img/${item.image}" class="img-fluid rounded" style="width: 150px; height: auto;" alt="${item.name}">
-            </div>
-            <div class="col-2 d-flex align-items-center justify-content-center fw-medium">
-                ${item.name}
-            </div>
-            <div class="col-3 d-flex justify-content-center align-items-center">
-                <span class="badge border rounded-3 bg-transparent ${displayStatus === "Pending" ? "text-warning" : displayStatus === "Available" ? 'text-success' : displayStatus === "Borrowed" ? "text-danger" : "text-danger"}">${displayStatus}</span>
-            </div>
-            <div class="col-5 d-flex justify-content-center align-items-center gap-2 flex-wrap">
+              </div>
+              <div class="col-2 d-flex align-items-center justify-content-center fw-medium">${item.name}</div>
+              <div class="col-3 d-flex justify-content-center align-items-center">
+                <span class="badge border rounded-3 bg-transparent ${displayStatus === "Pending" ? "text-warning" : displayStatus === "Available" ? "text-success" : displayStatus === "Borrowed" ? "text-danger" : "text-danger"}">${displayStatus}</span>
+              </div>
+              <div class="col-5 d-flex justify-content-center align-items-center gap-2 flex-wrap">
                 <button class="btn btn-success">Detail</button>
                 <button class="btn text-white ${statusColor}" ${isRequestDisabled ? "disabled" : ""} data-id="${item.id}">Request</button>
-            </div>
-          `;
+              </div>
+            `;
 
-          container.appendChild(row);
+            container.appendChild(row);
 
-          const buttons = row.querySelectorAll("button");
-          const detailBtn = buttons[0];
-          const requestBtn = buttons[1];
+            const buttons = row.querySelectorAll("button");
+            const detailBtn = buttons[0];
+            const requestBtn = buttons[1];
 
-          detailBtn.addEventListener("click", () => {
-            Swal.fire({
-              title: `${item.name} Details`,
-              html: `
-                <img src="/img/${item.image}" alt="${item.name}" style="max-width: 100%; height: auto;" class="mb-3 rounded shadow">
-                <p><strong>Status:</strong> ${displayStatus}</p>
-                <p><strong>Quantity:</strong> ${item.quantity}</p>
-              `,
-              confirmButtonText: "Close"
+            detailBtn.addEventListener("click", () => {
+              Swal.fire({
+                title: `${item.name} Details`,
+                html: `
+                  <img src="/img/${item.image}" alt="${item.name}" style="max-width: 100%; height: auto;" class="mb-3 rounded shadow">
+                  <p><strong>Status:</strong> ${displayStatus}</p>
+                  <p><strong>Quantity:</strong> ${item.quantity}</p>
+                `,
+                confirmButtonText: "Close"
+              });
             });
-          });
 
-          if (!isRequestDisabled) {
-            requestBtn.addEventListener("click", async function () {
-              const { value: reason } = await Swal.fire({
-                title: `Request ${item.name}`,
-                input: "textarea",
-                inputLabel: "Reason for Borrowing",
-                inputPlaceholder: "Type your reason here...",
-                inputAttributes: { "aria-label": "Type your reason here" },
-                showCancelButton: true,
-                confirmButtonText: "Confirm",
-                cancelButtonText: "Cancel",
-                inputValidator: (value) => {
-                  if (!value.trim()) {
-                    return "You need to enter a reason!";
+            if (!isRequestDisabled) {
+              requestBtn.addEventListener("click", async function () {
+                const { value: reason } = await Swal.fire({
+                  title: `Request ${item.name}`,
+                  input: "textarea",
+                  inputLabel: "Reason for Borrowing",
+                  inputPlaceholder: "Type your reason here...",
+                  inputAttributes: { "aria-label": "Type your reason here" },
+                  showCancelButton: true,
+                  confirmButtonText: "Confirm",
+                  cancelButtonText: "Cancel",
+                  inputValidator: (value) => {
+                    if (!value.trim()) {
+                      return "You need to enter a reason!";
+                    }
+                  }
+                });
+
+                if (reason) {
+                  try {
+                    const response = await fetch("/borrow", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        item_id: item.id,
+                        reason: reason,
+                        borrower_id: borrower_id
+                      })
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                      Swal.fire({
+                        icon: "success",
+                        title: "Request Confirmed",
+                        text: result.message
+                      }).then(() => location.reload());
+                    } else {
+                      Swal.fire({
+                        icon: "error",
+                        title: "Request Failed",
+                        text: result.error || "Something went wrong"
+                      });
+                    }
+                  } catch (err) {
+                    Swal.fire({
+                      icon: "error",
+                      title: "Error",
+                      text: "Unable to send request"
+                    });
+                    console.error("Fetch error:", err);
                   }
                 }
               });
-
-              if (reason) {
-                try {
-                  const response = await fetch("/borrow", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      item_id: item.id,
-                      reason: reason,
-                      borrower_id: borrower_id
-                    })
-                  });
-
-                  const result = await response.json();
-
-                  if (response.ok) {
-                    Swal.fire({
-                      icon: "success",
-                      title: "Request Confirmed",
-                      text: result.message
-                    }).then(() => location.reload());
-                  } else {
-                    Swal.fire({
-                      icon: "error",
-                      title: "Request Failed",
-                      text: result.error || "Something went wrong"
-                    });
-                  }
-                } catch (err) {
-                  Swal.fire({
-                    icon: "error",
-                    title: "Error",
-                    text: "Unable to send request"
-                  });
-                  console.error("Fetch error:", err);
-                }
-              }
-            });
+            }
           }
-        }
-      })
-      .catch((err) => {
-        console.error("Error fetching assets:", err);
-        container.innerHTML = `<div class="text-danger">Failed to load assets.</div>`;
-      });
-
+        })
+        .catch((err) => {
+          console.error("Error fetching assets:", err);
+          document.getElementById("request-items").innerHTML = `<div class="text-danger">Failed to load assets.</div>`;
+        });
+    }
   </script>
   <script src="/js/logout.js"></script>
 </body>
