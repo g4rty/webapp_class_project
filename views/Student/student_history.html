@@ -171,7 +171,7 @@
               : date.toLocaleDateString("en-GB", { day: "2-digit", month: "2-digit", year: "numeric" });
           }
 
-          const today = new Date();
+          const today = new Date().setHours(0,0,0,0);
 
           items.forEach(item => {
             const isReturned = item.handover_by_id && item.receiver_id;
@@ -180,7 +180,7 @@
             const isOverdue =
               item.return_date &&
               !isReturned &&
-              new Date(item.return_date).setHours(0, 0, 0, 0) < today.setHours(0, 0, 0, 0)
+              new Date(item.return_date).setHours(0, 0, 0, 0) < today
 
             const statusLabel = isReturned
               ? "Successfully Returned"
