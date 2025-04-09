@@ -104,6 +104,7 @@
         <div class="col fw-bold"></div>
         <div class="col fw-bold">Asset Name</div>
         <div class="col fw-bold">Borrowed Date</div>
+        <div class="col fw-bold">Due Date</div>
         <div class="col fw-bold">Returned Date</div>
         <div class="col fw-bold">Status of borrowing</div>
       </div>
@@ -208,6 +209,9 @@
               <div class="col d-flex align-items-center justify-content-center fw-medium">${item.name}</div>
               <div class="col flex-grow-1 d-flex justify-content-center align-items-center">
                 <span class="badge text-dark">${formatDate(item.borrow_date)}</span>
+              </div>
+              <div class="col d-flex justify-content-center align-items-center">
+                <span class="badge text-dark">${formatDate(item.return_date)}</span>
               </div>
               <div class="col d-flex justify-content-center align-items-center">
                 <span class="badge text-dark">${item.returned_date === "0000-00-00" ? "Not Returned" : formatDate(item.returned_date)}</span>
