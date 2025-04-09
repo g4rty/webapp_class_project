@@ -12,6 +12,15 @@ const path = require("path");
 const port = 6500;
 // Path to file setup
 
+// diasable caching
+app.use((req, res, next) => {
+  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+  res.setHeader("Pragma", "no-cache");
+  res.setHeader("Expires", "0");
+  next();
+});
+
+
 // public path for bootstrap, icons.
 // app.use(express.static(path.join(__dirname)));
 app.use(express.static(path.join(__dirname, 'public')));
