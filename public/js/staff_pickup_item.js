@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", function () {
       document.querySelectorAll(".handover-btn").forEach((btn) => {
         btn.addEventListener("click", function () {
         const requestId = this.dataset.id;
-        const userId = parseInt(sessionStorage.getItem("userId"));
+        const userId = sessionStorage.getItem("userId") || localStorage.getItem("userId");
 
           if (!userId || isNaN(userId)) {
             Swal.fire("Error", "User ID not found in session. Please log in again.", "error");
