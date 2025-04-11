@@ -32,7 +32,8 @@ fetch("/assets")
               ${item.status}
             </span>
         </div>
-        <div class="col-5 d-flex justify-content-center align-items-center gap-2 flex-wrap">
+         <div class="col-2 text-center fw-semibold">${item.quantity}</div>
+        <div class="col-3 d-flex justify-content-center align-items-center gap-2 flex-wrap">
             <button class="btn btn-success btn-sm view-btn">View Detail</button>
         </div>
       `;
@@ -46,7 +47,7 @@ fetch("/assets")
           html: `
             <img src="/img/${item.image}" alt="${item.name}" class="img-fluid rounded mb-3" style="max-width: 300px;">
             <p><strong>Status:</strong> ${item.status}</p>
-            <p><strong>Quantity:</strong> ${item.quantity}</p>
+            <p><strong>Quantity:</strong> ${item.status}</p>
           `,
           confirmButtonText: "Close"
         });

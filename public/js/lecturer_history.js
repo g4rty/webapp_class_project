@@ -111,6 +111,7 @@ function displayHistoryData(items) {
             : "bg-secondary";
   });
 
+
   items.forEach((item) => {
     const row = document.createElement("div");
     row.className =
