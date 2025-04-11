@@ -67,6 +67,50 @@ function displayHistoryData(items) {
     return;
   }
 
+  const today = new Date();
+
+  items.reverse(); // newest first
+  items.forEach(item => {
+    const isRejected = item.status === "rejected";
+    const isReturned = item.handover_by_id && item.receiver_id;
+    const isWaitingTakeout = item.status === "approved" && !item.handover_by_id;
+    const isWaitingReturn = item.status === "approved" && item.handover_by_id && !item.receiver_id;
+
+    // Normalize dates to remove time
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const returnDate = new Date(item.return_date);
+    returnDate.setHours(0, 0, 0, 0);
+
+    const isOverdue = item.return_date && !isReturned && returnDate < today;
+
+    // ✅ Add Rejected Label
+    const statusLabel = isReturned
+      ? "Successfully Returned"
+      : isRejected
+        ? "Rejected"
+        : isWaitingTakeout
+          ? "Waiting for Takeout"
+          : isWaitingReturn
+            ? isOverdue
+              ? "Overdue - Waiting for Return"
+              : "Waiting for Return"
+            : item.status.charAt(0).toUpperCase() + item.status.slice(1);
+
+    // Set badge color for rejected = bg-danger
+    const badgeClass = isReturned
+      ? "bg-success"
+      : isRejected
+        ? "bg-danger"
+        : isWaitingTakeout
+          ? "bg-info text-dark"
+          : isWaitingReturn
+            ? isOverdue
+              ? "bg-danger"
+              : "bg-primary"
+            : "bg-secondary";
+  });
+
   items.forEach((item) => {
     const row = document.createElement("div");
     row.className =
