@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Apr 17, 2025 at 03:15 PM
+-- Generation Time: Apr 18, 2025 at 09:31 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -42,11 +42,11 @@ CREATE TABLE `assets` (
 
 INSERT INTO `assets` (`id`, `name`, `status`, `image`, `quantity`, `description`) VALUES
 (1, 'Ping Pong', 'Available', 'pingpong.png', 1, ''),
-(2, 'Racket', 'Available', '1743515177821_tennisracket.png', 5, ''),
+(2, 'Racket', 'Available', '1743515177821_tennisracket.png', 4, ''),
 (3, 'Shuttlecock', 'Available', 'shuttlecock.png', 16, ''),
 (4, 'Tennis Ball', 'Disable', '1743518529305_tennisball.png', 5, ''),
 (5, 'Basketball', 'Available', '1743515302514_volleyball.png', 6, 'Basketball'),
-(6, 'Boxing Glove', 'Available', '1743518306838_boxing_gloves.png', 7, 'For Boxing sport'),
+(6, 'Boxing Glove', 'Available', '1743518306838_boxing_gloves.png', 6, 'For Boxing sport'),
 (7, 'Badminton racket', 'Available', '1743518566245_badmintonracket.png', 4, 'For badminton sport');
 
 -- --------------------------------------------------------
@@ -61,6 +61,7 @@ CREATE TABLE `borrow_requests` (
   `borrow_date` date NOT NULL COMMENT 'date that received actual item == handover_by_id',
   `return_date` date NOT NULL COMMENT 'expected to return date',
   `status` enum('pending','approved','rejected','cancelled','timeout') NOT NULL DEFAULT 'pending',
+  `rejection_reason` varchar(255) DEFAULT NULL,
   `request_date` date NOT NULL COMMENT 'date that req to borrowing',
   `returned_date` date DEFAULT NULL,
   `approve_by_id` smallint(5) UNSIGNED DEFAULT NULL,
@@ -74,8 +75,11 @@ CREATE TABLE `borrow_requests` (
 -- Dumping data for table `borrow_requests`
 --
 
-INSERT INTO `borrow_requests` (`id`, `asset_id`, `borrow_date`, `return_date`, `status`, `request_date`, `returned_date`, `approve_by_id`, `handover_by_id`, `receiver_id`, `borrower_id`, `reason`) VALUES
-(28, 1, '2025-04-09', '2025-04-10', 'cancelled', '2025-04-09', NULL, NULL, NULL, NULL, 11, 'test one');
+INSERT INTO `borrow_requests` (`id`, `asset_id`, `borrow_date`, `return_date`, `status`, `rejection_reason`, `request_date`, `returned_date`, `approve_by_id`, `handover_by_id`, `receiver_id`, `borrower_id`, `reason`) VALUES
+(28, 1, '2025-04-09', '2025-04-10', 'cancelled', NULL, '2025-04-09', NULL, NULL, NULL, NULL, 11, 'test one'),
+(29, 2, '2025-04-18', '2025-04-19', 'approved', NULL, '2025-04-18', NULL, 8, NULL, NULL, 9, 'test_name'),
+(30, 5, '2025-04-18', '2025-04-19', 'approved', NULL, '2025-04-18', '2025-04-18', 8, 7, 7, 10, 'test_name_return'),
+(31, 6, '2025-04-18', '2025-04-19', 'rejected', NULL, '2025-04-18', NULL, 8, NULL, NULL, 11, 'for running');
 
 -- --------------------------------------------------------
 
@@ -118,10 +122,10 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `first_name`, `last_name`, `username`, `password`, `role`, `email`) VALUES
-(7, '', '', 'staff', '$2b$10$DcLQvqRFSs.rRBJFwCkCX.jG2pdXpIzKs2SJNt17oIcZdj5i5dHrC', 1, 'staff@staff'),
-(8, '', '', 'lecturer', '$2b$10$T0xM4KhFXFNQfucy5fhE6uj1yA2oDWhxrcxT0cljlil.nDH7y.qqe', 2, 'lecturer@lecturer'),
-(9, '', '', 'student', '$2b$10$qs.LZBTbOwowqYR1cuR3eOv9vWidTZPLC7GijI7uxQ4GpQ5tMXd3.', 3, 'student@student'),
-(10, '', '', 'student2', '$2b$10$iKI9fmERvnfpT2eSOJRPSex5Y0J5PCqh56Uh4lN2lFZ3emVnjpBTC', 3, 'student2@student'),
+(7, 'bad staff', '', 'staff', '$2b$10$DcLQvqRFSs.rRBJFwCkCX.jG2pdXpIzKs2SJNt17oIcZdj5i5dHrC', 1, 'staff@staff'),
+(8, 'neung', 'mater two', 'lecturer', '$2b$10$T0xM4KhFXFNQfucy5fhE6uj1yA2oDWhxrcxT0cljlil.nDH7y.qqe', 2, 'lecturer@lecturer'),
+(9, 'goodstudent', '', 'student', '$2b$10$qs.LZBTbOwowqYR1cuR3eOv9vWidTZPLC7GijI7uxQ4GpQ5tMXd3.', 3, 'student@student'),
+(10, 'betterstudent', 'goodthaneveryone', 'student2', '$2b$10$iKI9fmERvnfpT2eSOJRPSex5Y0J5PCqh56Uh4lN2lFZ3emVnjpBTC', 3, 'student2@student'),
 (11, '', '', 'student3', '$2b$10$VBVawiqUwVJQeil17/yCtO1ll8lBayQq.8IeIvNtNXIubXHOTMi9u', 3, 'student3@student');
 
 --
@@ -172,7 +176,7 @@ ALTER TABLE `assets`
 -- AUTO_INCREMENT for table `borrow_requests`
 --
 ALTER TABLE `borrow_requests`
-  MODIFY `id` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'request_id', AUTO_INCREMENT=29;
+  MODIFY `id` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'request_id', AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT for table `news`
@@ -184,7 +188,7 @@ ALTER TABLE `news`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'user_id', AUTO_INCREMENT=13;
+  MODIFY `id` smallint(5) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT 'user_id', AUTO_INCREMENT=14;
 
 --
 -- Constraints for dumped tables

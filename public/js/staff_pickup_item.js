@@ -29,8 +29,8 @@ document.addEventListener("DOMContentLoaded", function () {
           <img src="/img/${item.asset_image}" class="img-fluid rounded" style="width: 70px; height: 100px; object-fit: cover;" alt="${item.asset_name}">
         </div>
         <div class="col-2 text-center">${item.asset_name}</div>
-        <div class="col-2 text-center">${item.borrower}</div>
-        <div class="col-2 text-center">${item.approve_by_id}</div>
+        <div class="col-2 text-center">${item.borrower_first_name} ${item.borrower_last_name}</div>
+        <div class="col-2 text-center">${item.approved_by_name || "N/A"}</div>
         <div class="col-2 text-center">${new Date(item.borrow_date).toLocaleDateString()}</div>
         <div class="col-2 text-center">
           <button class="btn btn-success handover-btn" data-id="${item.request_id}">

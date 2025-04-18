@@ -14,10 +14,10 @@ const port = 6500;
 
 // diasable caching
 app.use((req, res, next) => {
-  res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, private");
-  res.setHeader("Pragma", "no-cache");
-  res.setHeader("Expires", "0");
-  next();
+    res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate, private");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+    next();
 });
 
 
@@ -262,7 +262,6 @@ app.post("/login", function (req, res) {
             if (isMatch) {
                 const user = result[0];
 
-                //  Role mapping from number to string
                 const roleMap = {
                     1: "staff",
                     2: "lecturer",
@@ -274,7 +273,6 @@ app.post("/login", function (req, res) {
                     return res.status(403).send("Forbidden: Unknown Role");
                 }
 
-                // ✅ Step 3: Save to session
                 req.session.userId = user.id;
                 req.session.role = userRoleStr;
 
@@ -294,7 +292,7 @@ app.post("/login", function (req, res) {
 // REGISTER
 // #####################################################################################
 app.post("/register", function (req, res) {
-    const {first_name, last_name, username, email, password, confirmPassword } = req.body;
+    const { first_name, last_name, username, email, password, confirmPassword } = req.body;
 
     //Check if passwords match before proceeding
     if (password !== confirmPassword) {
@@ -727,15 +725,17 @@ app.get("/history", (req, res) => {
                 br.return_date,
                 br.returned_date,
                 br.status,
-                u1.username AS approved_by,
-                u2.username AS borrower,
-                u3.username AS received_by
+                br.rejection_reason,
+                CONCAT(u1.first_name, ' ', u1.last_name) AS approved_by,
+                CONCAT(u2.first_name, ' ', u2.last_name) AS borrower,
+                CONCAT(u3.first_name, ' ', u3.last_name) AS received_by
             FROM borrow_requests br
             JOIN assets a ON br.asset_id = a.id
             LEFT JOIN users u1 ON br.approve_by_id = u1.id
             JOIN users u2 ON br.borrower_id = u2.id
             LEFT JOIN users u3 ON br.receiver_id = u3.id
-            WHERE br.receiver_id != 0
+            WHERE br.status IN ('approved', 'returned', 'rejected')
+            ORDER BY br.borrow_date DESC;
         `;
     } else if (role === "lecturer") {
         sql = `
@@ -901,6 +901,38 @@ app.post("/handover/:id", (req, res) => {
 
 app.get("/handover-requests", (req, res) => {
     const sql = `
+    SELECT 
+      br.id AS request_id,
+      a.name AS asset_name,
+      a.image AS asset_image,
+      u.username AS borrower,
+      br.borrow_date,
+      br.return_date,
+      br.reason,
+      br.handover_by_id,
+      br.approve_by_id,
+      approver.first_name AS approved_by_name
+    FROM borrow_requests br
+    JOIN assets a ON br.asset_id = a.id
+    JOIN users u ON br.borrower_id = u.id
+    LEFT JOIN users approver ON br.approve_by_id = approver.id
+    WHERE br.status = 'approved' 
+      AND (br.handover_by_id IS NULL OR br.handover_by_id = 0)
+      AND br.approve_by_id IS NOT NULL
+    ORDER BY br.borrow_date DESC
+  `;
+
+    con.query(sql, (err, results) => {
+        if (err) {
+            console.error("Error fetching handover requests:", err);
+            return res.status(500).json({ error: "Failed to fetch handover requests" });
+        }
+
+        return res.status(200).json(results);
+    });
+});
+/* app.get("/handover-requests", (req, res) => {
+    const sql = `
       SELECT 
         br.id AS request_id,
         a.name AS asset_name,
@@ -928,8 +960,8 @@ app.get("/handover-requests", (req, res) => {
   
       return res.status(200).json(results);
     });
-  });
-  
+  }); */
+
 // ##################################################################################################################
 // return
 // ##################################################################################################################
@@ -940,31 +972,37 @@ app.get("/return-requests", (req, res) => {
         br.id AS request_id,
         a.name AS asset_name,
         a.image AS asset_image,
-        u.username AS borrower,
+        u.username AS borrower_username,
+        u.first_name AS borrower_first_name,
+        u.last_name AS borrower_last_name,
         br.borrow_date,
         br.return_date,
         br.reason,
         br.handover_by_id,
-        br.approve_by_id
+        br.approve_by_id,
+        approver.first_name AS approved_by_name,
+        handover.first_name AS handover_by_name
       FROM borrow_requests br
       JOIN assets a ON br.asset_id = a.id
       JOIN users u ON br.borrower_id = u.id
+      LEFT JOIN users approver ON br.approve_by_id = approver.id
+      LEFT JOIN users handover ON br.handover_by_id = handover.id
       WHERE br.status = 'approved'
         AND (br.handover_by_id IS NOT NULL AND br.handover_by_id != 0)
         AND (br.receiver_id IS NULL OR br.receiver_id = 0)
       ORDER BY br.borrow_date DESC
     `;
-  
+
     con.query(sql, (err, results) => {
-      if (err) {
-        console.error("Error fetching return requests:", err);
-        return res.status(500).json({ error: "Failed to fetch return requests" });
-      }
-  
-      return res.status(200).json(results);
+        if (err) {
+            console.error("Error fetching return requests:", err);
+            return res.status(500).json({ error: "Failed to fetch return requests" });
+        }
+
+        return res.status(200).json(results);
     });
-  });
-  
+});
+
 app.post("/return/:id", (req, res) => {
     const requestId = parseInt(req.params.id);
     const { userId } = req.body;

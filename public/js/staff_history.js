@@ -7,14 +7,14 @@ toggleBtn.addEventListener("click", () => {
   content.classList.toggle("shifted");
 });
 
-// Assume staffId is stored in localStorage after login
 const userId = localStorage.getItem("userId");
 
 fetch(`/history?role=staff&userId=${userId}`)
   .then(response => response.json())
   .then(items => {
     const container = document.getElementById("request-items");
-    if (items.length === 0) {
+
+    if (!items || items.length === 0) {
       container.innerHTML = '<p class="text-center">No history available.</p>';
       return;
     }
@@ -23,54 +23,86 @@ fetch(`/history?role=staff&userId=${userId}`)
       if (!dateStr || dateStr === "0000-00-00" || dateStr === null) {
         return "Not Returned";
       }
-
       const date = new Date(dateStr);
-
-      // If the date is invalid, show fallback
-      if (isNaN(date.getTime())) {
-        return "Not Returned";
-      }
-
-      // Format as DD/MM/YYYY (British style)
-      return date.toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric"
-      });
+      return isNaN(date.getTime())
+        ? "Not Returned"
+        : date.toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric"
+          });
     }
-
-
 
     items.forEach(item => {
       const row = document.createElement("div");
       row.className = "d-flex bg-light rounded shadow-sm p-3 mb-3 align-items-center text-center w-100";
-      let statusColor = item.status === "returned" ? "bg-success" : item.status === "approved" ? "bg-warning" : "bg-danger";
+
+      let statusColor = item.status === "returned"
+        ? "bg-success"
+        : item.status === "approved"
+          ? "text-success border border-success"
+          : "text-danger border border-danger";
+
+      const statusContent = item.status === "rejected"
+        ? `<button 
+             class="btn btn-outline-danger btn-sm reason-btn" 
+             data-reason="${item.rejection_reason || 'No reason provided'}"
+             data-bs-toggle="tooltip"
+             title="Click to view rejection reason">
+             <i class="fas fa-info-circle me-1"></i> View Rejection Reason
+           </button>`
+        : `<div class="badge ${statusColor} text-break w-100">${item.status}</div>`;
+
       row.innerHTML = `
-    <div class="col fw-semibold">${item.id}</div>
-    <div class="col d-flex justify-content-center">
-      <img src="/img/${item.image}" class="img-fluid rounded" style="width: 80px; height: auto;" alt="${item.name}">
-    </div>
-    <div class="col d-flex align-items-center justify-content-center fw-medium">${item.name}</div>
-    <div class="col flex-grow-1 d-flex justify-content-center align-items-center">
-      <span class="badge text-dark">${formatDate(item.borrow_date)}</span>
-    </div>
-    <div class="col d-flex justify-content-center align-items-center">
-      <span class="badge text-dark">${formatDate(item.returned_date)}</span>
-    </div>
-    <div class="col d-flex justify-content-center align-items-center">
-      <span class="badge text-dark">${item.borrower}</span>
-    </div>
-    <div class="col d-flex justify-content-center align-items-center">
-      <span class="badge text-dark">${item.approved_by || 'N/A'}</span>
-    </div>
-    <div class="col d-flex justify-content-center align-items-center">
-      <span class="badge text-dark">${item.received_by || 'N/A'}</span>
-    </div>
-    <div class="col d-flex justify-content-center align-items-center">
-      <span class="badge ${statusColor} text-white">${item.status}</span>
-    </div>
-  `;
+        <div class="col fw-semibold">${item.id}</div>
+        <div class="col d-flex justify-content-center">
+          <img src="/img/${item.image}" class="img-fluid rounded" style="width: 80px; height: auto;" alt="${item.name}">
+        </div>
+        <div class="col d-flex align-items-center justify-content-center fw-medium text-break">${item.name}</div>
+        <div class="col d-flex justify-content-center align-items-center">
+          <div class="badge text-dark text-break">${formatDate(item.borrow_date)}</div>
+        </div>
+        <div class="col d-flex justify-content-center align-items-center">
+          <div class="badge text-dark text-break">${formatDate(item.returned_date)}</div>
+        </div>
+        <div class="col d-flex justify-content-center align-items-center">
+          <div class="badge text-dark text-break w-100">${item.borrower}</div>
+        </div>
+        <div class="col d-flex justify-content-center align-items-center">
+          <div class="badge text-dark text-break w-100">${item.approved_by || 'N/A'}</div>
+        </div>
+        <div class="col d-flex justify-content-center align-items-center">
+          <div class="badge text-dark text-break w-100">${item.received_by || 'N/A'}</div>
+        </div>
+        <div class="col d-flex justify-content-center align-items-center">
+          ${statusContent}
+        </div>
+      `;
+
       container.appendChild(row);
     });
+
+    // ✅ Attach event listener to all rejection reason buttons
+    document.querySelectorAll(".reason-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        Swal.fire({
+          icon: "info",
+          title: "Rejection Reason",
+          text: btn.dataset.reason,
+          confirmButtonText: "Close"
+        });
+      });
+    });
+
+    // ✅ Initialize Bootstrap tooltips
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    tooltipTriggerList.forEach(el => new bootstrap.Tooltip(el));
   })
-  .catch(error => console.error('Error fetching history:', error));
+  .catch(error => {
+    console.error('Error fetching history:', error);
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: "Failed to fetch history data."
+    });
+  });
