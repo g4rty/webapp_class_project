@@ -102,10 +102,11 @@
       </div>
       <div class="d-flex bg-dark text-white rounded-pill px-4 py-2 mb-4 mt-3 align-items-center">
         <div class="col-1 text-center fw-bold">ID</div>
-        <div class="col-1 text-center fw-bold"></div>
-        <div class="col-2 text-center fw-bold">Asset Name</div>
-        <div class="col-3 text-center fw-bold">Status</div>
-        <div class="col-5 text-center fw-bold"></div>
+        <div class="col-2 text-center fw-bold"></div>
+        <div class="col-3 text-center fw-bold">Asset Name</div>
+        <div class="col-1 text-center fw-bold">Status</div>
+        <div class="col-2 text-center fw-bold">Quantity</div>
+        <div class="col-2 text-center fw-bold">Actions</div>
       </div>
       <div id="request-items"></div>
     </div>
@@ -154,15 +155,15 @@
 
             row.innerHTML = `
               <div class="col-1 text-center fw-semibold">${item.id}</div>
-              <div class="col-1 d-flex justify-content-center">
+              <div class="col-2 d-flex justify-content-center">
                 <img src="/img/${item.image}" class="img-fluid rounded" style="width: 150px; height: auto;" alt="${item.name}">
               </div>
-              <div class="col-2 d-flex align-items-center justify-content-center fw-medium">${item.name}</div>
-              <div class="col-3 d-flex justify-content-center align-items-center">
-                <span class="badge border rounded-3 bg-transparent ${displayStatus === "Pending" ? "text-warning" : displayStatus === "Available" ? "text-success" : displayStatus === "Borrowed" ? "text-danger" : "text-danger"}">${displayStatus}</span>
+              <div class="col-3 d-flex align-items-center justify-content-center fw-medium">${item.name}</div>
+              <div class="col-1 d-flex justify-content-center align-items-center">
+                <span class="badge border rounded-3 bg-transparent ${displayStatus === "Pending" ? "text-warning" : displayStatus === "Available" ? "text-success" : displayStatus === "Borrowed" ? "text-danger" : "text-secondary"}">${displayStatus}</span>
               </div>
-              <div class="col-5 d-flex justify-content-center align-items-center gap-2 flex-wrap">
-                <button class="btn btn-success">Detail</button>
+              <div class="col-2 text-center fw-semibold">${item.quantity}</div>
+              <div class="col-2 d-flex justify-content-center align-items-center gap-2 flex-wrap">
                 <button class="btn text-white ${statusColor}" ${isRequestDisabled ? "disabled" : ""} data-id="${item.id}">Request</button>
               </div>
             `;
@@ -170,10 +171,10 @@
             container.appendChild(row);
 
             const buttons = row.querySelectorAll("button");
-            const detailBtn = buttons[0];
-            const requestBtn = buttons[1];
+            //const detailBtn = buttons[0];
+            const requestBtn = buttons[0];
 
-            detailBtn.addEventListener("click", () => {
+            /*detailBtn.addEventListener("click", () => {
               Swal.fire({
                 title: `${item.name} Details`,
                 html: `
@@ -183,7 +184,7 @@
                 `,
                 confirmButtonText: "Close"
               });
-            });
+            });*/
 
             if (!isRequestDisabled) {
               requestBtn.addEventListener("click", async function () {
