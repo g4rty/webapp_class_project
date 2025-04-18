@@ -294,7 +294,7 @@ app.post("/login", function (req, res) {
 // REGISTER
 // #####################################################################################
 app.post("/register", function (req, res) {
-    const { username, email, password, confirmPassword } = req.body;
+    const {first_name, last_name, username, email, password, confirmPassword } = req.body;
 
     //Check if passwords match before proceeding
     if (password !== confirmPassword) {
@@ -322,8 +322,8 @@ app.post("/register", function (req, res) {
             }
 
             //Insert user into the database with hashed password
-            const sql = `INSERT INTO users (username, password, role, email) VALUES (?, ?, 3, ?)`;
-            con.query(sql, [username, hashedPassword, email], function (err, result) {
+            const sql = `INSERT INTO users (first_name, last_name, username, password, role, email) VALUES (?, ?,?, ?, 3, ?)`;
+            con.query(sql, [first_name, last_name, username, hashedPassword, email], function (err, result) {
                 if (err) {
                     console.error("Database Error:", err);
                     return res.status(500).send("Database error");

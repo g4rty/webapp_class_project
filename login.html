@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <link href="/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
         .logo {
             height: 50px;
@@ -43,7 +44,12 @@
             </div>
             <form id="form-login">
                 <input type="text" class="form-control mt-3" placeholder="Username" name="username">
-                <input type="password" class="form-control mt-3" placeholder="Password" name="password">
+                <div class="input-group mt-3">
+                <input type="password" name="password" class="form-control" id="password" placeholder="Password" required>
+                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password', this)">
+                    <i class="fa-solid fa-eye"></i>
+                </button>
+                </div>
                 <button class="btn btn-dark w-100 mt-3">LOGIN</button>
             </form>
             <p class="text-center mt-2">Need an account? <a href="/register" class="text-black">Register here</a>

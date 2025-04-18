@@ -1,8 +1,24 @@
 const registerForm = document.getElementById("register-form");
+function togglePassword(fieldId, button) {
+  const input = document.getElementById(fieldId);
+  const icon = button.querySelector("i");
+
+  if (input.type === "password") {
+    input.type = "text";
+    icon.classList.remove("fa-eye");
+    icon.classList.add("fa-eye-slash");
+  } else {
+    input.type = "password";
+    icon.classList.remove("fa-eye-slash");
+    icon.classList.add("fa-eye");
+  }
+}
 
 registerForm.onsubmit = async function (e) {
     e.preventDefault();
 
+    const first_name = registerForm.first_name.value;
+    const last_name = registerForm.last_name.value;    
     const username = registerForm.username.value;
     const email = registerForm.email.value;
     const password = registerForm.password.value;
@@ -13,7 +29,7 @@ registerForm.onsubmit = async function (e) {
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ username, email, password, confirmPassword })
+        body: JSON.stringify({first_name,last_name, username, email, password, confirmPassword })
     };
 
     try {
