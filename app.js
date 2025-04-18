@@ -10,7 +10,6 @@ const path = require("path");
 
 // Port number
 const port = 6500;
-// Path to file setup
 
 // diasable caching
 app.use((req, res, next) => {
@@ -19,11 +18,6 @@ app.use((req, res, next) => {
     res.setHeader("Expires", "0");
     next();
 });
-
-
-// public path for bootstrap, icons.
-// app.use(express.static(path.join(__dirname)));
-app.use(express.static(path.join(__dirname, 'public')));
 
 app.get("/password/:password", function (req, res) {
     const password = req.params.password;
@@ -63,9 +57,6 @@ const upload = multer({
     limits: { fileSize: 10 * 1024 * 1024 } // Max 10MB
 });
 
-
-
-
 app.listen(port, function () {
     console.log("Server is ready at " + port);
 });
@@ -84,155 +75,64 @@ app.use(session({
 
 function requireRole(role) {
     return (req, res, next) => {
-        if (!req.session.role) {
-            return res.status(401).send("Not logged in");
-        }
-
-        if (req.session.role !== role) {
-            return res.status(403).send("Forbidden: Access denied for your role");
-        }
-
-        next();
+      // 1) Not logged in → expire
+      if (!req.session.userId) {
+        return req.session.destroy(err => {
+          res.clearCookie("connect.sid");
+          res.redirect("/login?expired=1");
+        });
+      }
+  
+      // 2) Wrong role → denied
+      const ok = Array.isArray(role)
+        ? role.includes(req.session.role)
+        : req.session.role === role;
+      if (!ok) {
+        return req.session.destroy(err => {
+          res.clearCookie("connect.sid");
+          // <<< use denied=1 here >>>
+          res.redirect("/login?denied=1");
+        });
+      }
+  
+      // 3) All good
+      next();
     };
-}
-
-//-----------------------------Links to HTML-----------------------------//
-// Public pages
-// app.get("/", (req, res) => {
-//     res.sendFile(path.join(__dirname, "homepage.html"));
-// });
-// app.get("/login", (req, res) => {
-//     res.sendFile(path.join(__dirname, "login.html"));
-// });
-// app.get("/register", (req, res) => {
-//     res.sendFile(path.join(__dirname, "register.html"));
-// });
-
-// app.get("/lecturer/home", requireRole("lecturer"), (req, res) => {
-//     res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_home.html"));
-// });
-// app.get("/lecturer/request", requireRole("lecturer"), (req, res) => {
-//     res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_request_items.html"));
-// });
-// app.get("/lecturer/history", requireRole("lecturer"), (req, res) => {
-//     res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_history.html"));
-// });
-// app.get("/lecturer/dashboard", requireRole("lecturer"), (req, res) => {
-//     res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_dashboard.html"));
-// });
-// app.get("/lecturer/asset", requireRole("lecturer"), (req, res) => {
-//     res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_asset_list.html"));
-// });
-
-// app.get("/staff/home", requireRole("staff"), (req, res) => {
-//     res.sendFile(path.join(__dirname, "views/Staff/staff_home.html"));
-// });
-// app.get("/staff/news", requireRole("staff"), (req, res) => {
-//     res.sendFile(path.join(__dirname, "views/Staff/staff_add_news.html"));
-// });
-// app.get("/staff/asset", requireRole("staff"), (req, res) => {
-//     res.sendFile(path.join(__dirname, "views/Staff/staff_asset_list.html"));
-// });
-// app.get("/staff/dashboard", requireRole("staff"), (req, res) => {
-//     res.sendFile(path.join(__dirname, "views/Staff/staff_dashboard.html"));
-// });
-// app.get("/staff/history", requireRole("staff"), (req, res) => {
-//     res.sendFile(path.join(__dirname, "views/Staff/staff_history.html"));
-// });
-// app.get("/staff/pickup", requireRole("staff"), (req, res) => {
-//     res.sendFile(path.join(__dirname, "views/Staff/staff_pickup_item.html"));
-// });
-// app.get("/staff/return", requireRole("staff"), (req, res) => {
-//     res.sendFile(path.join(__dirname, "views/Staff/staff_return_item.html"));
-// });
-
-// app.get("/student/home", requireRole("student"), (req, res) => {
-//     res.sendFile(path.join(__dirname, "views/Student/student_home.html"));
-// });
-// app.get("/student/assets", requireRole("student"), (req, res) => {
-//     res.sendFile(path.join(__dirname, "views/Student/student_asset_list.html"));
-// });
-// app.get("/student/history", requireRole("student"), (req, res) => {
-//     res.sendFile(path.join(__dirname, "views/Student/student_history.html"));
-// });
-// app.get("/student/request", requireRole("student"), (req, res) => {
-//     res.sendFile(path.join(__dirname, "views/Student/student_request_item.html"));
-// });
-
-//-----------------------------Links to HTML-----------------------------//
+  }
+  
 // Root directory
-app.get("/", function (req, res) {
-    res.sendFile(path.join(__dirname, "homepage.html"));
-});
-// Route to serve login.html
-app.get("/login", function (req, res) {
-    res.sendFile(path.join(__dirname, "login.html"));
-});
-app.get("/register", function (req, res) {
-    res.sendFile(path.join(__dirname, "register.html"));
-});
+app.use(express.static(path.join(__dirname, 'public')));
 
-//Lecturer routes
-app.get("/lecturer/home", function (req, res) {
-    res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_home.html"));
+// Public (no auth needed)
+// serve that file:
+app.get('/unauthorized', (req, res) => {
+res.sendFile(path.join(__dirname, 'views/unauthorized.html'));
 });
-app.get("/lecturer/request", function (req, res) {
-    res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_request_items.html"));
-});
-app.get("/lecturer/history", function (req, res) {
-    res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_history.html"));
-}
-);
-app.get('/lecturer/dashboard', (req, res) => {
-    res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_dashboard.html"));
-}
-);
-app.get('/lecturer/asset', (req, res) => {
-    res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_asset_list.html"));
-}
-);
+app.get("/",           (req, res) => res.sendFile(path.join(__dirname, "homepage.html")));
+app.get("/login",      (req, res) => res.sendFile(path.join(__dirname, "login.html")));
+app.get("/register",   (req, res) => res.sendFile(path.join(__dirname, "register.html")));
 
-//Staff routes
-app.get("/staff/news", function (req, res) {
-    res.sendFile(path.join(__dirname, "views/Staff/staff_add_news.html"));
-});
-app.get("/staff/asset", function (req, res) {
-    res.sendFile(path.join(__dirname, "views/Staff/staff_asset_list.html"));
-});
-app.get("/staff/dashboard", function (req, res) {
-    res.sendFile(path.join(__dirname, "views/Staff/staff_dashboard.html"));
-});
-app.get("/staff/history", function (req, res) {
-    res.sendFile(path.join(__dirname, "views/Staff/staff_history.html"));
-});
-app.get("/staff/home", function (req, res) {
-    res.sendFile(path.join(__dirname, "views/Staff/staff_home.html"));
-});
-app.get("/staff/pickup", function (req, res) {
-    res.sendFile(path.join(__dirname, "views/Staff/staff_pickup_item.html"));
-});
-app.get("/staff/return", function (req, res) {
-    res.sendFile(path.join(__dirname, "views/Staff/staff_return_item.html"));
-});
-app.get("/staff/home", function (req, res) {
-    res.sendFile(path.join(__dirname, "views/Staff/staff_home.html"));
-});
+// STUDENT‑ONLY
+app.get("/student/home",    requireRole("student"), (req, res) => res.sendFile(path.join(__dirname, "views/Student/student_home.html")));
+app.get("/student/assets",  requireRole("student"), (req, res) => res.sendFile(path.join(__dirname, "views/Student/student_asset_list.html")));
+app.get("/student/request", requireRole("student"), (req, res) => res.sendFile(path.join(__dirname, "views/Student/student_request_item.html")));
+app.get("/student/history", requireRole("student"), (req, res) => res.sendFile(path.join(__dirname, "views/Student/student_history.html")));
 
-//Student routes
-app.get("/student/home", function (req, res) {
-    res.sendFile(path.join(__dirname, "views/Student/student_home.html"));
-});
-app.get("/student/assets", function (req, res) {
-    res.sendFile(path.join(__dirname, "views/Student/student_asset_list.html"));
-});
-app.get("/student/history", function (req, res) {
-    res.sendFile(path.join(__dirname, "views/Student/student_history.html"));
-});
-app.get("/student/request", function (req, res) {
-    res.sendFile(path.join(__dirname, "views/Student/student_request_item.html"));
-});
+// LECTURER‑ONLY
+app.get("/lecturer/home",     requireRole("lecturer"), (req, res) => res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_home.html")));
+app.get("/lecturer/request",  requireRole("lecturer"), (req, res) => res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_request_items.html")));
+app.get("/lecturer/history",  requireRole("lecturer"), (req, res) => res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_history.html")));
+app.get("/lecturer/dashboard",requireRole("lecturer"), (req, res) => res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_dashboard.html")));
+app.get("/lecturer/asset",    requireRole("lecturer"), (req, res) => res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_asset_list.html")));
 
-
+// STAFF‑ONLY
+app.get("/staff/home",    requireRole("staff"), (req, res) => res.sendFile(path.join(__dirname, "views/Staff/staff_home.html")));
+app.get("/staff/asset",   requireRole("staff"), (req, res) => res.sendFile(path.join(__dirname, "views/Staff/staff_asset_list.html")));
+app.get("/staff/news",    requireRole("staff"), (req, res) => res.sendFile(path.join(__dirname, "views/Staff/staff_add_news.html")));
+app.get("/staff/dashboard",requireRole("staff"), (req, res) => res.sendFile(path.join(__dirname, "views/Staff/staff_dashboard.html")));
+app.get("/staff/pickup",  requireRole("staff"), (req, res) => res.sendFile(path.join(__dirname, "views/Staff/staff_pickup_item.html")));
+app.get("/staff/return",  requireRole("staff"), (req, res) => res.sendFile(path.join(__dirname, "views/Staff/staff_return_item.html")));
+app.get("/staff/history", requireRole("staff"), (req, res) => res.sendFile(path.join(__dirname, "views/Staff/staff_history.html")));
 
 
 // #####################################################################################

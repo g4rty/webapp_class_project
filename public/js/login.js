@@ -1,3 +1,5 @@
+sessionStorage.clear();
+localStorage.clear();
 const form_login = document.getElementById("form-login");
 
 function togglePassword(fieldId, button) {
