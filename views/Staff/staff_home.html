@@ -67,6 +67,11 @@
       object-fit: cover;
     }
 
+    .image-grid img:hover {
+      transform: scale(1.05);
+      transition: transform 0.1s;
+    }
+
     .carousel {
       position: relative;
       width: 1250px;
@@ -177,7 +182,9 @@
       <span class="indicator" onclick="moveToSlide(2)"></span>
     </div>
     <div class="container text-center">
-      <h1 class="fw-bold mt-3 mb-4 text-center">What's news</h1>
+      <h1 class="fw-bold mt-3 mb-4 text-center"><i class="fa-sharp-duotone fa-solid fa-bullhorn fa-rotate-by fa-lg mx-3"
+        style="--fa-rotate-angle: -10deg;">
+      </i>What's New</h1>
       <div class="image-grid" id="news-container"></div>
     </div>
   </div>

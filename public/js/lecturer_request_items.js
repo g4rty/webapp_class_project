@@ -70,12 +70,10 @@ fetch('/my-requests/lecturer', {
           title: item.asset_name,
           html: `
             <img src="/img/${item.asset_image}" class="img-fluid rounded mb-3" style="max-width: 300px;">
-            <p><strong>Description:</strong> ${item.descrp}</p>
-            <p><strong>Reason:</strong> ${item.reason}</p>
             <p><strong>Status:</strong> ${item.status}</p>
             <p><strong>Requested Date:</strong> ${item.request_date}</p>
             <p><strong>Return Date:</strong> ${item.return_date}</p>
-            <p><strong>Approved By:</strong> ${item.approved_by || "Not yet approved"}</p>
+            <p><strong>Reason:</strong> ${item.reason}</p>
           `,
           confirmButtonText: "Close"
         });
@@ -125,11 +123,21 @@ fetch('/my-requests/lecturer', {
       row.querySelector(".reject-btn").addEventListener("click", () => {
         Swal.fire({
           title: "Reject Request",
-          text: `Are you sure you want to reject the request for ${item.asset_name}?`,
+          input: "textarea",
+          inputLabel: "Rejection Reason",
+          inputPlaceholder: `Enter the reason for rejecting for ${item.asset_name}...`,
+          inputAttributes: {
+            'aria-label': 'Type your rejection reason here'
+          },
           icon: "warning",
           showCancelButton: true,
           confirmButtonText: "Yes, reject it",
-          cancelButtonText: "Cancel"
+          cancelButtonText: "Cancel",
+          inputValidator: (value) => {
+            if (!value) {
+              return "Rejection reason is required!";
+            }
+          }
         }).then(result => {
           if (result.isConfirmed) {
             fetch(`/borrow/${item.request_id}/reject`, {
@@ -137,7 +145,7 @@ fetch('/my-requests/lecturer', {
               headers: {
                 'Content-Type': 'application/json',
               },
-              body: JSON.stringify({ approve_by_id: approveById }),
+              body: JSON.stringify({ approve_by_id: approveById, rejection_reason: result.value }),
             })
             .then(res => res.json())
             .then(() => {

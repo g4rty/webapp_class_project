@@ -527,17 +527,18 @@ app.put("/borrow/:id/approve", (req, res) => {
     const id = req.params.id;
     const { approve_by_id } = req.body;
 
+    const approvalDate = new Date().toISOString().split("T")[0];
     const returnDate = new Date();
     returnDate.setDate(returnDate.getDate() + 1); // Set return date to 1 days from today
     const formattedReturnDate = returnDate.toISOString().split("T")[0];
 
     const sql = `
       UPDATE borrow_requests 
-      SET status = 'approved', approve_by_id = ?, return_date = ? 
+      SET status = 'approved', approve_by_id = ?, return_date = ?, approval_date = ?
       WHERE id = ?
     `;
 
-    con.query(sql, [approve_by_id, formattedReturnDate, id], (err, result) => {
+    con.query(sql, [approve_by_id, formattedReturnDate, approvalDate, id], (err, result) => {
         if (err) {
             console.error("Error approving borrow request:", err);
             return res.status(500).json({ error: "Failed to approve borrow request" });
@@ -550,59 +551,38 @@ app.put("/borrow/:id/approve", (req, res) => {
 // Reject a borrow request
 app.put("/borrow/:id/reject", (req, res) => {
     const id = req.params.id;
-    const { approve_by_id } = req.body;
+    const { approve_by_id, rejection_reason } = req.body;
+
+    const approvalDate = new Date().toISOString().split("T")[0];
+
+    if (!rejection_reason || rejection_reason.trim() === "") {
+        return res.status(400).json({ error: "Rejection reason is required" });
+    }
 
     const sql = `
       UPDATE borrow_requests 
-      SET status = 'rejected', approve_by_id = ? 
+      SET status = 'rejected', approve_by_id = ?, rejection_reason = ?, approval_date = ?
       WHERE id = ?
     `;
 
-    con.query(sql, [approve_by_id, id], (err, result) => {
+    con.query(sql, [approve_by_id, rejection_reason, approvalDate, id], (err, result) => {
         if (err) {
             console.error("Error rejecting borrow request:", err);
             return res.status(500).json({ error: "Failed to reject borrow request" });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Borrow request not found" });
         }
 
         return res.status(200).json({ message: "Borrow request rejected successfully" });
     });
 });
 
-// app.get('/history?role=lecturer&userId={id}', (req, res) => {
-//     const { userId } = req.query;
+// ########################################################
+// history
+// ########################################################
 
-//     if (!userId) {
-//         return res.status(400).json({ error: "Missing userId" });
-//     }
-
-//     const sql = `
-//       SELECT 
-//         br.id,
-//         a.name,
-//         a.image,
-//         br.borrow_date AS Approval_date,
-//         br.return_date,
-//         u.username AS approved_by,
-//         br.status
-//       FROM borrow_requests br
-//       JOIN assets a ON br.asset_id = a.id
-//       LEFT JOIN users u ON br.approve_by_id = u.id
-//       WHERE br.status IN ('approved', 'rejected') AND br.approve_by_id = ?
-//     `;
-
-//     con.query(sql, [userId], (err, results) => {
-//         if (err) {
-//             return res.status(500).json({ error: "Failed to fetch history" });
-//         }
-
-//         if (results.length === 0) {
-//             return res.status(404).json({ message: "No history records found" });
-//         }
-
-//         return res.status(200).json(results);
-//     });
-// }
-// );
 
 app.get("/history", (req, res) => {
     const role = req.query.role;
@@ -647,11 +627,15 @@ app.get("/history", (req, res) => {
                 br.return_date,
                 br.returned_date,
                 br.status,
+                br.rejection_reason,
+                DATE_FORMAT(br.approval_date, '%Y-%m-%d') AS approval_date,
+                u2.username AS approved_by,
                 u.username AS borrower,
                 a.name AS asset_name
             FROM borrow_requests br
             JOIN assets a ON br.asset_id = a.id
             JOIN users u ON br.borrower_id = u.id
+            LEFT JOIN users u2 ON br.approve_by_id = u2.id
             WHERE br.approve_by_id = ? AND br.status IN ('approved', 'rejected')
         `;
         params = [userId];
@@ -665,6 +649,7 @@ app.get("/history", (req, res) => {
                 br.return_date,
                 br.returned_date,
                 br.status,
+                br.rejection_reason,
                 br.approve_by_id,
                 br.receiver_id,
                 br.handover_by_id,
