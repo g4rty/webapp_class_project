@@ -629,13 +629,13 @@ app.get("/history", (req, res) => {
                 br.status,
                 br.rejection_reason,
                 DATE_FORMAT(br.approval_date, '%Y-%m-%d') AS approval_date,
-                u2.username AS approved_by,
-                u.username AS borrower,
+                CONCAT(u1.first_name, ' ', u1.last_name) AS approved_by,
+                CONCAT(u2.first_name, ' ', u2.last_name) AS borrower,
                 a.name AS asset_name
             FROM borrow_requests br
             JOIN assets a ON br.asset_id = a.id
-            JOIN users u ON br.borrower_id = u.id
-            LEFT JOIN users u2 ON br.approve_by_id = u2.id
+            LEFT JOIN users u1 ON br.approve_by_id = u1.id
+            JOIN users u2 ON br.borrower_id = u2.id
             WHERE br.approve_by_id = ? AND br.status IN ('approved', 'rejected')
         `;
         params = [userId];
