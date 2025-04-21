@@ -47,6 +47,8 @@ form_login.onsubmit = async function (e) {
             localStorage.setItem("role", userRole);
             sessionStorage.setItem("userId", userId);
             sessionStorage.setItem("role", userRole);
+            sessionStorage.setItem("username", username);
+            localStorage.setItem("username", username);
 
             // SweetAlert and Redirect
             Swal.fire({

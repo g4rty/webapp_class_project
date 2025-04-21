@@ -160,6 +160,7 @@
       </button>
       <span class="navbar-brand ms-3 fs-4">Asset Borrowing System</span>
       <div class="ms-auto d-flex align-items-center">
+        <span id="navbar-username" class="navbar-username mx-4 fw-bold" style="font-size: 20px;"></span>
       </div>
     </nav>
 
@@ -177,8 +178,8 @@
 
     <div class="container text-center">
       <h1 class="fw-bold mt-3 mb-4 text-center"><i class="fa-sharp-duotone fa-solid fa-bullhorn fa-rotate-by fa-lg mx-3"
-        style="--fa-rotate-angle: -10deg;">
-      </i>What's New</h1>
+          style="--fa-rotate-angle: -10deg;">
+        </i>What's New</h1>
       <div class="image-grid" id="news-container"></div>
     </div>
 
@@ -202,7 +203,7 @@
     setInterval(() => {
       currentSlide = (currentSlide + 1) % slides.length;
       moveToSlide(currentSlide);
-    },5000);
+    }, 5000);
     const toggleBtn = document.getElementById("toggle-btn");
     const sidebar = document.getElementById("sidebar");
     const content = document.getElementById("main-content");
@@ -210,6 +211,17 @@
     toggleBtn.addEventListener("click", () => {
       sidebar.classList.toggle("active");
       content.classList.toggle("shifted");
+    });
+
+    // Fetch username from sessionStorage / localStorage
+    // and display it in the navbar
+    document.addEventListener("DOMContentLoaded", () => {
+      const username = sessionStorage.getItem("username") || localStorage.getItem("username");
+      const navbarUsername = document.getElementById("navbar-username");
+
+      if (username && navbarUsername) {
+        navbarUsername.textContent = `Welcome, ${username}!`;
+      }
     });
 
     fetch("/news")
