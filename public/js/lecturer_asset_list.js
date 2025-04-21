@@ -14,7 +14,7 @@ fetch("/assets")
   .then((items) => {
     for (let i = 0; i < items.length; i++) {
       const item = items[i];
-
+      const status = item.quantity === 0 ? "Borrowed" : item.status;
       const row = document.createElement("div");
       row.className = "d-flex bg-light rounded shadow-sm p-3 mb-3 align-items-center w-100";
 
@@ -26,13 +26,14 @@ fetch("/assets")
         <div class="col d-flex align-items-center justify-content-center fw-medium">
             ${item.name}
         </div>
+        <div class="col text-center fw-semibold">${item.quantity}</div>
         <div class="col d-flex justify-content-center align-items-center">
             <span class="badge border rounded-3 bg-transparent 
-              ${item.status === "Pending" ? "text-warning" : item.status === "Available" ? "text-success" : item.status === "Disable" ? "text-secondary" : "text-danger"}">
-              ${item.status}
+              ${status === "Pending" ? "text-warning" : status === "Available" ? "text-success" : status === "Disable" ? "text-secondary" : status === "Borrowed" ? "text-danger" : "text-dark"}">
+                ${status}
             </span>
         </div>
-         <div class="col text-center fw-semibold">${item.quantity}</div>
+         
       `;
 
       container.appendChild(row);
