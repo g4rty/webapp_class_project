@@ -97,24 +97,24 @@ fetch('/my-requests/lecturer', {
               },
               body: JSON.stringify({ approve_by_id: approveById }),
             })
-            .then(res => res.json())
-            .then(() => {
-              Swal.fire({
-                icon: "success",
-                title: "Approved",
-                text: `${item.asset_name} has been approved.`,
-                timer: 1000,
-                showConfirmButton: false
-              }).then(() => location.reload()); // ✅ Reload page
-            })
-            .catch(err => {
-              console.error("Approval error:", err);
-              Swal.fire({
-                icon: "error",
-                title: "Approval Failed",
-                text: "Something went wrong!",
+              .then(res => res.json())
+              .then(() => {
+                Swal.fire({
+                  icon: "success",
+                  title: "Approved",
+                  text: `${item.asset_name} has been approved.`,
+                  timer: 1000,
+                  showConfirmButton: false
+                }).then(() => location.reload()); // ✅ Reload page
+              })
+              .catch(err => {
+                console.error("Approval error:", err);
+                Swal.fire({
+                  icon: "error",
+                  title: "Approval Failed",
+                  text: "Something went wrong!",
+                });
               });
-            });
           }
         });
       });
@@ -125,17 +125,37 @@ fetch('/my-requests/lecturer', {
           title: "Reject Request",
           input: "textarea",
           inputLabel: "Rejection Reason",
-          inputPlaceholder: `Enter the reason for rejecting for ${item.asset_name}...`,
+          inputPlaceholder: `Enter the reason for rejecting ${item.asset_name}...`,
           inputAttributes: {
-            'aria-label': 'Type your rejection reason here'
+            'aria-label': 'Type your rejection reason here',
           },
           icon: "warning",
           showCancelButton: true,
           confirmButtonText: "Yes, reject it",
           cancelButtonText: "Cancel",
+          footer: `<div id="char-count" style="font-size: 12px; color: #6c757d;"> 0 / 100 Characters </div>`, // Add footer for character count
+          didOpen: () => {
+            // Get the textarea input
+            const textarea = Swal.getInput();
+            const charCount = document.getElementById("char-count");
+      
+            // Update the character counter as the user types
+            textarea.addEventListener("input", () => {
+              const typed = textarea.value.length; // Count characters typed
+              const remaining = 100 - typed; // Calculate remaining characters
+              charCount.textContent = `${typed} / ${remaining} Characters`;
+              charCount.style.color = remaining < 0 ? "red" : "#6c757d"; // Turn red if over the limit
+            });
+          },
           inputValidator: (value) => {
             if (!value) {
               return "Rejection reason is required!";
+            }
+            if (value.length < 10) {
+              return "Rejection reason must be at least 10 characters long.";
+            }
+            if (value.length > 100) {
+              return "Rejection reason must not exceed 100 characters.";
             }
           }
         }).then(result => {
@@ -147,34 +167,26 @@ fetch('/my-requests/lecturer', {
               },
               body: JSON.stringify({ approve_by_id: approveById, rejection_reason: result.value }),
             })
-            .then(res => res.json())
-            .then(() => {
-              Swal.fire({
-                icon: "info",
-                title: "Rejected",
-                text: `"${item.asset_name}" has been rejected.`,
-                timer: 1000,
-                showConfirmButton: false
-              }).then(() => location.reload()); // ✅ Reload page
-            })
-            .catch(err => {
-              console.error("Rejection error:", err);
-              Swal.fire({
-                icon: "error",
-                title: "Rejection Failed",
-                text: "Something went wrong!",
+              .then(res => res.json())
+              .then(() => {
+                Swal.fire({
+                  icon: "info",
+                  title: "Rejected",
+                  text: `"${item.asset_name}" has been rejected.`,
+                  timer: 1000,
+                  showConfirmButton: false
+                }).then(() => location.reload()); // ✅ Reload page
+              })
+              .catch(err => {
+                console.error("Rejection error:", err);
+                Swal.fire({
+                  icon: "error",
+                  title: "Rejection Failed",
+                  text: "Something went wrong!",
+                });
               });
-            });
           }
         });
       });
     });
   })
-  .catch(err => {
-    console.error("Error fetching request items:", err);
-    Swal.fire({
-      icon: "error",
-      title: "Error",
-      text: "Failed to load request items.",
-    });
-  });

@@ -449,7 +449,7 @@ app.post("/my-requests/lecturer", (req, res) => {
         DATE_FORMAT(br.request_date, '%Y-%m-%d') AS request_date,
         DATE_FORMAT(br.return_date, '%Y-%m-%d') AS return_date,
         br.reason,
-        u.username AS borrower
+        CONCAT(u.first_name, ' ', u.last_name) AS borrower
       FROM borrow_requests br
       JOIN assets a ON br.asset_id = a.id
       JOIN users u ON br.borrower_id = u.id
