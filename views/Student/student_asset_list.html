@@ -171,20 +171,7 @@
             container.appendChild(row);
 
             const buttons = row.querySelectorAll("button");
-            //const detailBtn = buttons[0];
             const requestBtn = buttons[0];
-
-            /*detailBtn.addEventListener("click", () => {
-              Swal.fire({
-                title: `${item.name} Details`,
-                html: `
-                  <img src="/img/${item.image}" alt="${item.name}" style="max-width: 100%; height: auto;" class="mb-3 rounded shadow">
-                  <p><strong>Status:</strong> ${displayStatus}</p>
-                  <p><strong>Quantity:</strong> ${item.quantity}</p>
-                `,
-                confirmButtonText: "Close"
-              });
-            });*/
 
             if (!isRequestDisabled) {
               requestBtn.addEventListener("click", async function () {
@@ -200,6 +187,9 @@
                   inputValidator: (value) => {
                     if (!value.trim()) {
                       return "You need to enter a reason!";
+                    }
+                    if (value.trim().length < 10) {
+                      return "Your reason must be at least 10 characters long!";
                     }
                   }
                 });
