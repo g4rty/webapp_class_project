@@ -179,7 +179,8 @@ app.post("/login", function (req, res) {
                 return res.status(200).json({
                     message: `/${userRoleStr}/home`, // For frontend redirect
                     role: userRoleStr,
-                    userId: user.id
+                    userId: user.id,
+                    username: user.username // send username back
                 });
             } else {
                 return res.status(401).send("Wrong password");
