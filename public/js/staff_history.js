@@ -56,7 +56,7 @@ fetch(`/history?role=staff&userId=${userId}`)
       row.innerHTML = `
         <div class="col fw-semibold">${item.id}</div>
         <div class="col d-flex justify-content-center">
-          <img src="/img/${item.image}" class="img-fluid rounded" style="width: 80px; height: auto;" alt="${item.name}">
+          <img src="/img/${item.image}" class="img-fluid rounded" style="width: 150px; height: auto;" alt="${item.name}">
         </div>
         <div class="col d-flex align-items-center justify-content-center fw-medium text-break">${item.name}</div>
         <div class="col d-flex justify-content-center align-items-center">
