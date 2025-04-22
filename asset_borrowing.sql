@@ -64,6 +64,7 @@ CREATE TABLE `borrow_requests` (
   `rejection_reason` varchar(255) DEFAULT NULL,
   `request_date` date NOT NULL COMMENT 'date that req to borrowing',
   `returned_date` date DEFAULT NULL,
+  `approval_date` date DEFAULT NULL,
   `approve_by_id` smallint(5) UNSIGNED DEFAULT NULL,
   `handover_by_id` int(11) UNSIGNED DEFAULT NULL,
   `receiver_id` int(11) UNSIGNED DEFAULT NULL,
@@ -75,11 +76,11 @@ CREATE TABLE `borrow_requests` (
 -- Dumping data for table `borrow_requests`
 --
 
-INSERT INTO `borrow_requests` (`id`, `asset_id`, `borrow_date`, `return_date`, `status`, `rejection_reason`, `request_date`, `returned_date`, `approve_by_id`, `handover_by_id`, `receiver_id`, `borrower_id`, `reason`) VALUES
-(28, 1, '2025-04-09', '2025-04-10', 'cancelled', NULL, '2025-04-09', NULL, NULL, NULL, NULL, 11, 'test one'),
-(29, 2, '2025-04-18', '2025-04-19', 'approved', NULL, '2025-04-18', NULL, 8, NULL, NULL, 9, 'test_name'),
-(30, 5, '2025-04-18', '2025-04-19', 'approved', NULL, '2025-04-18', '2025-04-18', 8, 7, 7, 10, 'test_name_return'),
-(31, 6, '2025-04-18', '2025-04-19', 'rejected', NULL, '2025-04-18', NULL, 8, NULL, NULL, 11, 'for running');
+INSERT INTO `borrow_requests` (`id`, `asset_id`, `borrow_date`, `return_date`, `status`, `request_date`, `returned_date`, `approval_date`, `approve_by_id`, `handover_by_id`, `receiver_id`, `borrower_id`, `reason`, `rejection_reason`) VALUES
+(28, 1, '2025-04-09', '2025-04-10', 'cancelled', '2025-04-09', NULL, '2025-04-09', NULL, NULL, NULL, 11, 'test one', NULL),
+(29, 2, '2025-04-18', '2025-04-19', 'approved', '2025-04-18', NULL, '2025-04-18', 8, NULL, NULL, 9, 'test_name', NULL),
+(30, 5, '2025-04-18', '2025-04-19', 'approved', '2025-04-18', '2025-04-18', '2025-04-18', 8, 7, 7, 10, 'test_name_return', NULL),
+(31, 6, '2025-04-18', '2025-04-19', 'rejected', '2025-04-18', NULL, '2025-04-18', 8, NULL, NULL, 11, 'for running', 'Need more reason to borrowing.');
 
 -- --------------------------------------------------------
 
