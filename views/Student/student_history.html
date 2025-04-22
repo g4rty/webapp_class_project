@@ -101,13 +101,14 @@
         <h1 class="mb-4 fw-bold">History</h1>
       </div>
       <div class="row bg-dark text-white rounded-pill px-4 py-2 mb-4 mt-3 text-center">
+        <div class="col fw-bold">ID</div>
         <div class="col fw-bold"></div>
         <div class="col fw-bold">Asset Name</div>
         <div class="col fw-bold">Borrowed Date</div>
         <div class="col fw-bold">Due Date</div>
         <div class="col fw-bold">Returned Date</div>
-        <div class="col fw-bold">Rejection Reason</div>
         <div class="col fw-bold">Status of Borrowing</div>
+        <div class="col fw-bold">Rejection Reason</div>
       </div>
       <div id="request-items"></div>
     </div>
@@ -207,8 +208,9 @@
             const row = document.createElement("div");
             row.className = "d-flex bg-light rounded shadow-sm p-3 mb-3 align-items-center text-center w-100";
             row.innerHTML = `
+            <div class="col text-center fw-semibold">${item.id || "N/A"}</div>
               <div class="col d-flex justify-content-center">
-                <img src="/img/${item.image}" class="img-fluid rounded" style="width: 80px; height: auto;" alt="${item.name}">
+                <img src="/img/${item.image}" class="img-fluid rounded" style="width: 150px; height: auto;" alt="${item.name}">
               </div>
               <div class="col d-flex align-items-center justify-content-center fw-medium">${item.name}</div>
               <div class="col flex-grow-1 d-flex justify-content-center align-items-center">
@@ -221,10 +223,10 @@
                 <span class="badge text-dark">${item.returned_date === "0000-00-00" ? "Not Returned" : formatDate(item.returned_date)}</span>
               </div>
               <div class="col d-flex justify-content-center align-items-center">
-                <span class="badge text-dark">${rejectionReason}</span>
+                <span class="badge text-white ${badgeClass}">${statusLabel}</span>
               </div>
               <div class="col d-flex justify-content-center align-items-center">
-                <span class="badge text-white ${badgeClass}">${statusLabel}</span>
+                <span class="badge text-dark">${rejectionReason}</span>
               </div>
             `;
             container.appendChild(row);
