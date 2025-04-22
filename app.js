@@ -270,41 +270,30 @@ app.post("/borrow", (req, res) => {
         return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // Step 1: Check if the student already has an active request
     const activeRequestSql = `
-      SELECT id FROM borrow_requests 
-      WHERE borrower_id = ? 
-      AND (status = 'pending' OR (status = 'approved' AND (receiver_id IS NULL OR receiver_id = 0)))
+        SELECT id FROM borrow_requests 
+        WHERE borrower_id = ? 
+        AND (status = 'pending' OR (status = 'approved' AND (receiver_id IS NULL OR receiver_id = 0)))
     `;
 
     con.query(activeRequestSql, [borrower_id], (err, activeResults) => {
-        if (err) {
-            console.error("Active request check error:", err);
-            return res.status(500).json({ error: "Database error during active request check" });
-        }
-
+        if (err) return res.status(500).json({ error: "Database error (active request check)" });
         if (activeResults.length > 0) {
-            return res.status(409).json({ error: "You can only request one item at a time. Cancel or complete your current request first." });
+            return res.status(409).json({ error: "You already have an active request." });
         }
 
-        // Step 2: Check if this specific item was already requested today and not cancelled
         const checkSql = `
-          SELECT id FROM borrow_requests 
-          WHERE asset_id = ? AND borrower_id = ? AND borrow_date = ? 
-          AND status != 'cancelled'
+            SELECT id FROM borrow_requests 
+            WHERE asset_id = ? AND borrower_id = ? AND borrow_date = ? 
+            AND status != 'cancelled'
         `;
 
         con.query(checkSql, [item_id, borrower_id, today], (err, results) => {
-            if (err) {
-                console.error("Check error:", err);
-                return res.status(500).json({ error: "Database error during duplicate check" });
-            }
-
+            if (err) return res.status(500).json({ error: "Database error (duplicate request check)" });
             if (results.length > 0) {
                 return res.status(409).json({ error: "You've already requested this item today." });
             }
 
-            // Step 3: Insert the new request
             const insertSql = `
                 INSERT INTO borrow_requests 
                 (asset_id, borrower_id, borrow_date, return_date, request_date, reason, status) 
@@ -312,24 +301,36 @@ app.post("/borrow", (req, res) => {
             `;
 
             con.query(insertSql, [item_id, borrower_id, today, tomorrowStr, today, reason], (err, result) => {
-                if (err) {
-                    console.error("Insert error:", err);
-                    return res.status(500).json({ error: "Database insert failed" });
-                }
+                if (err) return res.status(500).json({ error: "Failed to insert request" });
 
-                // Step 4: Reduce quantity in assets table
-                const updateQtySql = `UPDATE assets SET quantity = quantity - 1 WHERE id = ? AND quantity > 0`;
-
-                con.query(updateQtySql, [item_id], (err) => {
-                    if (err) {
-                        console.warn("Quantity update warning:", err);
+                // Step 1: Get current quantity
+                const getQtySql = `SELECT quantity FROM assets WHERE id = ?`;
+                con.query(getQtySql, [item_id], (err, qtyResult) => {
+                    if (err || qtyResult.length === 0) {
+                        return res.status(500).json({ error: "Failed to retrieve asset quantity" });
                     }
-                    return res.status(200).json({ message: "Request submitted successfully." });
+
+                    const currentQty = qtyResult[0].quantity;
+                    const newQty = currentQty - 1;
+                    const newStatus = newQty === 0 ? "Borrowed" : "Available";
+
+                    // Step 2: Update quantity and status
+                    const updateSql = `UPDATE assets SET quantity = ?, status = ? WHERE id = ?`;
+
+                    con.query(updateSql, [newQty, newStatus, item_id], (err) => {
+                        if (err) {
+                            return res.status(500).json({ error: "Failed to update asset status" });
+                        }
+
+                        return res.status(200).json({ message: "Request submitted successfully." });
+                    });
                 });
             });
         });
     });
 });
+
+
 // #####################################################################################
 // cancel request 
 // #####################################################################################
@@ -342,10 +343,11 @@ app.post("/cancel-request", (req, res) => {
 
     // Step 1: Get the asset_id from the borrow request
     const getAssetSql = `
-      SELECT asset_id 
-      FROM borrow_requests 
-      WHERE id = ? AND status = 'pending';
+        SELECT asset_id 
+        FROM borrow_requests 
+        WHERE id = ? AND status = 'pending';
     `;
+
     con.query(getAssetSql, [request_id], (err, result) => {
         if (err) {
             console.error("Error fetching asset_id:", err);
@@ -359,10 +361,11 @@ app.post("/cancel-request", (req, res) => {
 
         // Step 2: Update the borrow request to 'cancelled'
         const updateRequestSql = `
-        UPDATE borrow_requests 
-        SET status = 'cancelled' 
-        WHERE id = ? AND status = 'pending';
-      `;
+            UPDATE borrow_requests 
+            SET status = 'cancelled' 
+            WHERE id = ? AND status = 'pending';
+        `;
+
         con.query(updateRequestSql, [request_id], (err, result) => {
             if (err) {
                 console.error("Error cancelling request:", err);
@@ -374,20 +377,47 @@ app.post("/cancel-request", (req, res) => {
 
             // Step 3: Increase the quantity in the assets table
             const updateQuantitySql = `
-          UPDATE assets 
-          SET quantity = quantity + 1 
-          WHERE id = ?;
-        `;
+                UPDATE assets 
+                SET quantity = quantity + 1 
+                WHERE id = ?;
+            `;
             con.query(updateQuantitySql, [asset_id], (err, result) => {
                 if (err) {
                     console.error("Error updating quantity:", err);
                     return res.status(500).json({ error: "Failed to update quantity" });
                 }
-                res.status(200).json({ message: "Request cancelled successfully, quantity updated" });
+
+                // Step 4: Check new quantity and update status if quantity > 0
+                const checkQuantitySql = `
+                    SELECT quantity FROM assets WHERE id = ?;
+                `;
+                con.query(checkQuantitySql, [asset_id], (err, rows) => {
+                    if (err) {
+                        console.error("Error checking updated quantity:", err);
+                        return res.status(500).json({ error: "Failed to verify updated quantity" });
+                    }
+
+                    const updatedQty = rows[0].quantity;
+                    if (updatedQty > 0) {
+                        const updateStatusSql = `
+                            UPDATE assets SET status = 'Available' WHERE id = ?;
+                        `;
+                        con.query(updateStatusSql, [asset_id], (err) => {
+                            if (err) {
+                                console.warn("Failed to update status to Available:", err);
+                                // still continue even if this part fails
+                            }
+                            return res.status(200).json({ message: "Request cancelled, quantity updated, status set to Available." });
+                        });
+                    } else {
+                        return res.status(200).json({ message: "Request cancelled, quantity updated." });
+                    }
+                });
             });
         });
     });
 });
+
 
 // #####################################################################################
 // STUDENT REQUESTED LIST
@@ -648,6 +678,8 @@ app.get("/history", (req, res) => {
             a.image,
             br.borrow_date,
             br.return_date,
+            br.handover_by_id,
+            br.receiver_id,
             br.returned_date,
             br.status,
             br.rejection_reason,
@@ -704,11 +736,25 @@ app.post("/asset/:id/toggle_status", (req, res) => {
 // Edit Asset Info
 app.post("/asset/update/:id", upload.single("image"), (req, res) => {
     const id = parseInt(req.params.id);
-    const { name, quantity, status } = req.body;
+    const name = req.body.name;
+    let quantity = parseInt(req.body.quantity);
+    let status = req.body.status;
     const image = req.file ? req.file.filename : null;
 
-    if (!id || !name || quantity === undefined || !["Available", "Pending", "Borrowed", "Disable"].includes(status)) {
+    // Validate required fields
+    if (!id || !name || isNaN(quantity)) {
         return res.status(400).json({ success: false, message: "Invalid input" });
+    }
+
+    // Force status to "Borrowed" if quantity is zero
+    if (quantity === 0) {
+        status = "Borrowed";
+    }
+
+    // Only allow known status values (after override)
+    const validStatuses = ["Available", "Pending", "Borrowed", "Disable"];
+    if (!validStatuses.includes(status)) {
+        return res.status(400).json({ success: false, message: "Invalid status value" });
     }
 
     let sql, values;
@@ -730,7 +776,7 @@ app.post("/asset/update/:id", upload.single("image"), (req, res) => {
             return res.status(404).json({ success: false, message: "Asset not found" });
         }
 
-        return res.status(200).json({ success: true });
+        return res.status(200).json({ success: true, updated: { name, quantity, status } });
     });
 });
 
