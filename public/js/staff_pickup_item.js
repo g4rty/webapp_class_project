@@ -21,12 +21,12 @@ document.addEventListener("DOMContentLoaded", function () {
       items.forEach((item) => {
         const row = document.createElement("div");
         row.className = "d-flex bg-light rounded shadow-sm p-3 mb-3 mt-3 align-items-center w-100";
-        row.style.height = "120px";
+        // row.style.height = "120px";
 
         row.innerHTML = `
         <div class="col-1 text-center fw-semibold">${item.request_id}</div>
         <div class="col-1 d-flex justify-content-center">
-          <img src="/img/${item.asset_image}" class="img-fluid rounded" style="width: 70px; height: 100px; object-fit: cover;" alt="${item.asset_name}">
+          <img src="/img/${item.asset_image}" class="img-fluid rounded" style="width: 150px; height: auto;" alt="${item.asset_name}">
         </div>
         <div class="col-2 text-center">${item.asset_name}</div>
         <div class="col-2 text-center">${item.borrower_first_name} ${item.borrower_last_name}</div>
