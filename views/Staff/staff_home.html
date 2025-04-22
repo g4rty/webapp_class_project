@@ -164,6 +164,7 @@
       </button>
       <span class="navbar-brand ms-3 fs-4">Asset Borrowing System</span>
       <div class="ms-auto d-flex align-items-center">
+        <span id="navbar-username" class="navbar-username mx-4 fw-bold" style="font-size: 20px;"></span>
       </div>
     </nav>
 
@@ -217,6 +218,16 @@
     toggleBtn.addEventListener("click", () => {
       sidebar.classList.toggle("active");
       content.classList.toggle("shifted");
+    });
+    // Fetch username from sessionStorage / localStorage
+    // and display it in the navbar
+    document.addEventListener("DOMContentLoaded", () => {
+      const username = sessionStorage.getItem("username") || localStorage.getItem("username");
+      const navbarUsername = document.getElementById("navbar-username");
+
+      if (username && navbarUsername) {
+        navbarUsername.textContent = `Welcome, ${username}!`;
+      }
     });
 
     fetch("/news")
