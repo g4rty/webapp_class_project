@@ -204,7 +204,7 @@
                     : "bg-secondary";
 
             // Rejection Reason
-            const rejectionReason = isRejected && item.rejection_reason ? item.rejection_reason : "-";
+            const rejectionReason = isRejected && item.rejection_reason ? item.rejection_reason : "Not Available";
 
             const row = document.createElement("div");
             row.className = "d-flex bg-light rounded shadow-sm p-3 mb-3 align-items-center text-center w-100";
@@ -224,7 +224,7 @@
                 <span class="badge text-dark">${item.returned_date === "0000-00-00" ? "Not Returned" : formatDate(item.returned_date)}</span>
               </div>
               <div class="col d-flex justify-content-center align-items-center">
-                <div class="badge text-dark text-break w-100">${item.received_by || '-'}</div>
+                <div class="badge text-dark text-break w-100">${item.received_by || 'Not Available'}</div>
               </div>
               <div class="col d-flex justify-content-center align-items-center">
                 <span class="badge text-white ${badgeClass}">${statusLabel}</span>
