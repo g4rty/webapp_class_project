@@ -75,63 +75,63 @@ app.use(session({
 
 function requireRole(role) {
     return (req, res, next) => {
-      // 1) Not logged in → expire
-      if (!req.session.userId) {
-        return req.session.destroy(err => {
-          res.clearCookie("connect.sid");
-          res.redirect("/login?expired=1");
-        });
-      }
-  
-      // 2) Wrong role → denied
-      const ok = Array.isArray(role)
-        ? role.includes(req.session.role)
-        : req.session.role === role;
-      if (!ok) {
-        return req.session.destroy(err => {
-          res.clearCookie("connect.sid");
-          // <<< use denied=1 here >>>
-          res.redirect("/login?denied=1");
-        });
-      }
-  
-      // 3) All good
-      next();
+        // 1) Not logged in → expire
+        if (!req.session.userId) {
+            return req.session.destroy(err => {
+                res.clearCookie("connect.sid");
+                res.redirect("/login?expired=1");
+            });
+        }
+
+        // 2) Wrong role → denied
+        const ok = Array.isArray(role)
+            ? role.includes(req.session.role)
+            : req.session.role === role;
+        if (!ok) {
+            return req.session.destroy(err => {
+                res.clearCookie("connect.sid");
+                // <<< use denied=1 here >>>
+                res.redirect("/login?denied=1");
+            });
+        }
+
+        // 3) All good
+        next();
     };
-  }
-  
+}
+
 // Root directory
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Public (no auth needed)
 // serve that file:
 app.get('/unauthorized', (req, res) => {
-res.sendFile(path.join(__dirname, 'views/unauthorized.html'));
+    res.sendFile(path.join(__dirname, 'views/unauthorized.html'));
 });
-app.get("/",           (req, res) => res.sendFile(path.join(__dirname, "homepage.html")));
-app.get("/login",      (req, res) => res.sendFile(path.join(__dirname, "login.html")));
-app.get("/register",   (req, res) => res.sendFile(path.join(__dirname, "register.html")));
+app.get("/", (req, res) => res.sendFile(path.join(__dirname, "homepage.html")));
+app.get("/login", (req, res) => res.sendFile(path.join(__dirname, "login.html")));
+app.get("/register", (req, res) => res.sendFile(path.join(__dirname, "register.html")));
 
 // STUDENT‑ONLY
-app.get("/student/home",    requireRole("student"), (req, res) => res.sendFile(path.join(__dirname, "views/Student/student_home.html")));
-app.get("/student/assets",  requireRole("student"), (req, res) => res.sendFile(path.join(__dirname, "views/Student/student_asset_list.html")));
+app.get("/student/home", requireRole("student"), (req, res) => res.sendFile(path.join(__dirname, "views/Student/student_home.html")));
+app.get("/student/assets", requireRole("student"), (req, res) => res.sendFile(path.join(__dirname, "views/Student/student_asset_list.html")));
 app.get("/student/request", requireRole("student"), (req, res) => res.sendFile(path.join(__dirname, "views/Student/student_request_item.html")));
 app.get("/student/history", requireRole("student"), (req, res) => res.sendFile(path.join(__dirname, "views/Student/student_history.html")));
 
 // LECTURER‑ONLY
-app.get("/lecturer/home",     requireRole("lecturer"), (req, res) => res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_home.html")));
-app.get("/lecturer/request",  requireRole("lecturer"), (req, res) => res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_request_items.html")));
-app.get("/lecturer/history",  requireRole("lecturer"), (req, res) => res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_history.html")));
-app.get("/lecturer/dashboard",requireRole("lecturer"), (req, res) => res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_dashboard.html")));
-app.get("/lecturer/asset",    requireRole("lecturer"), (req, res) => res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_asset_list.html")));
+app.get("/lecturer/home", requireRole("lecturer"), (req, res) => res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_home.html")));
+app.get("/lecturer/request", requireRole("lecturer"), (req, res) => res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_request_items.html")));
+app.get("/lecturer/history", requireRole("lecturer"), (req, res) => res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_history.html")));
+app.get("/lecturer/dashboard", requireRole("lecturer"), (req, res) => res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_dashboard.html")));
+app.get("/lecturer/asset", requireRole("lecturer"), (req, res) => res.sendFile(path.join(__dirname, "views/Lecturer/lecturer_asset_list.html")));
 
 // STAFF‑ONLY
-app.get("/staff/home",    requireRole("staff"), (req, res) => res.sendFile(path.join(__dirname, "views/Staff/staff_home.html")));
-app.get("/staff/asset",   requireRole("staff"), (req, res) => res.sendFile(path.join(__dirname, "views/Staff/staff_asset_list.html")));
-app.get("/staff/news",    requireRole("staff"), (req, res) => res.sendFile(path.join(__dirname, "views/Staff/staff_add_news.html")));
-app.get("/staff/dashboard",requireRole("staff"), (req, res) => res.sendFile(path.join(__dirname, "views/Staff/staff_dashboard.html")));
-app.get("/staff/pickup",  requireRole("staff"), (req, res) => res.sendFile(path.join(__dirname, "views/Staff/staff_pickup_item.html")));
-app.get("/staff/return",  requireRole("staff"), (req, res) => res.sendFile(path.join(__dirname, "views/Staff/staff_return_item.html")));
+app.get("/staff/home", requireRole("staff"), (req, res) => res.sendFile(path.join(__dirname, "views/Staff/staff_home.html")));
+app.get("/staff/asset", requireRole("staff"), (req, res) => res.sendFile(path.join(__dirname, "views/Staff/staff_asset_list.html")));
+app.get("/staff/news", requireRole("staff"), (req, res) => res.sendFile(path.join(__dirname, "views/Staff/staff_add_news.html")));
+app.get("/staff/dashboard", requireRole("staff"), (req, res) => res.sendFile(path.join(__dirname, "views/Staff/staff_dashboard.html")));
+app.get("/staff/pickup", requireRole("staff"), (req, res) => res.sendFile(path.join(__dirname, "views/Staff/staff_pickup_item.html")));
+app.get("/staff/return", requireRole("staff"), (req, res) => res.sendFile(path.join(__dirname, "views/Staff/staff_return_item.html")));
 app.get("/staff/history", requireRole("staff"), (req, res) => res.sendFile(path.join(__dirname, "views/Staff/staff_history.html")));
 
 
@@ -642,24 +642,23 @@ app.get("/history", (req, res) => {
         params = [userId];
     } else if (role === "student") {
         sql = `
-            SELECT 
-                br.id,
-                a.name,
-                a.image,
-                br.borrow_date,
-                br.return_date,
-                br.returned_date,
-                br.status,
-                br.rejection_reason,
-                br.approve_by_id,
-                br.receiver_id,
-                br.handover_by_id,
-                u.username AS approved_by
-            FROM borrow_requests br
-            JOIN assets a ON br.asset_id = a.id
-            LEFT JOIN users u ON br.approve_by_id = u.id
-            WHERE br.borrower_id = ? AND br.status IN ('approved', 'rejected', 'cancelled')
-        `;
+        SELECT 
+            br.id,
+            a.name,
+            a.image,
+            br.borrow_date,
+            br.return_date,
+            br.returned_date,
+            br.status,
+            br.rejection_reason,
+            CONCAT(u1.first_name, ' ', u1.last_name) AS approved_by,
+            CONCAT(u3.first_name, ' ', u3.last_name) AS received_by
+        FROM borrow_requests br
+        JOIN assets a ON br.asset_id = a.id
+        LEFT JOIN users u1 ON br.approve_by_id = u1.id
+        LEFT JOIN users u3 ON br.receiver_id = u3.id
+        WHERE br.borrower_id = ? AND br.status IN ('approved', 'rejected', 'cancelled', 'returned')
+    `;
         params = [userId];
     } else {
         return res.status(403).json({ error: "Invalid role provided" });
@@ -792,6 +791,8 @@ app.get("/handover-requests", (req, res) => {
       a.name AS asset_name,
       a.image AS asset_image,
       u.username AS borrower,
+      u.first_name AS borrower_first_name,
+      u.last_name AS borrower_last_name,
       br.borrow_date,
       br.return_date,
       br.reason,
