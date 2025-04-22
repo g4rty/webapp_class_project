@@ -107,6 +107,7 @@
         <div class="col fw-bold">Borrowed Date</div>
         <div class="col fw-bold">Due Date</div>
         <div class="col fw-bold">Returned Date</div>
+        <div class="col  fw-bold">Received By</div>
         <div class="col fw-bold">Status of Borrowing</div>
         <div class="col fw-bold">Rejection Reason</div>
       </div>
@@ -164,7 +165,7 @@
           items.reverse(); // newest first
           items.forEach(item => {
             const isRejected = item.status === "rejected";
-            const isReturned = item.handover_by_id && item.receiver_id;
+            const isReturned = item.handover_by_id && item.receiver_id && item.status === "approved";
             const isWaitingTakeout = item.status === "approved" && !item.handover_by_id;
             const isWaitingReturn = item.status === "approved" && item.handover_by_id && !item.receiver_id;
 
@@ -221,6 +222,9 @@
               </div>
               <div class="col d-flex justify-content-center align-items-center">
                 <span class="badge text-dark">${item.returned_date === "0000-00-00" ? "Not Returned" : formatDate(item.returned_date)}</span>
+              </div>
+              <div class="col d-flex justify-content-center align-items-center">
+                <div class="badge text-dark text-break w-100">${item.received_by || 'N/A'}</div>
               </div>
               <div class="col d-flex justify-content-center align-items-center">
                 <span class="badge text-white ${badgeClass}">${statusLabel}</span>
