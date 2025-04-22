@@ -106,7 +106,8 @@
         <div class="col fw-bold">Borrowed Date</div>
         <div class="col fw-bold">Due Date</div>
         <div class="col fw-bold">Returned Date</div>
-        <div class="col fw-bold">Status of borrowing</div>
+        <div class="col fw-bold">Rejection Reason</div>
+        <div class="col fw-bold">Status of Borrowing</div>
       </div>
       <div id="request-items"></div>
     </div>
@@ -174,7 +175,7 @@
 
             const isOverdue = item.return_date && !isReturned && returnDate < today;
 
-            // ✅ Add Rejected Label
+            // Status Label
             const statusLabel = isReturned
               ? "Successfully Returned"
               : isRejected
@@ -200,6 +201,9 @@
                       : "bg-primary"
                     : "bg-secondary";
 
+            // Rejection Reason
+            const rejectionReason = isRejected && item.rejection_reason ? item.rejection_reason : "N/A";
+
             const row = document.createElement("div");
             row.className = "d-flex bg-light rounded shadow-sm p-3 mb-3 align-items-center text-center w-100";
             row.innerHTML = `
@@ -215,6 +219,9 @@
               </div>
               <div class="col d-flex justify-content-center align-items-center">
                 <span class="badge text-dark">${item.returned_date === "0000-00-00" ? "Not Returned" : formatDate(item.returned_date)}</span>
+              </div>
+              <div class="col d-flex justify-content-center align-items-center">
+                <span class="badge text-dark">${rejectionReason}</span>
               </div>
               <div class="col d-flex justify-content-center align-items-center">
                 <span class="badge text-white ${badgeClass}">${statusLabel}</span>
