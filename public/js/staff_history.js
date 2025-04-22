@@ -66,13 +66,13 @@ fetch(`/history?role=staff&userId=${userId}`)
           <div class="badge text-dark text-break">${formatDate(item.returned_date)}</div>
         </div>
         <div class="col d-flex justify-content-center align-items-center">
-          <div class="badge text-dark text-break w-100">${item.borrower}</div>
+          <div class="badge text-dark text-break w-100">${item.borrower || 'Not Available'}</div>
         </div>
         <div class="col d-flex justify-content-center align-items-center">
-          <div class="badge text-dark text-break w-100">${item.approved_by || 'N/A'}</div>
+          <div class="badge text-dark text-break w-100">${item.approved_by || 'Not Available'}</div>
         </div>
         <div class="col d-flex justify-content-center align-items-center">
-          <div class="badge text-dark text-break w-100">${item.received_by || 'N/A'}</div>
+          <div class="badge text-dark text-break w-100">${item.received_by || 'Not Available'}</div>
         </div>
         <div class="col d-flex justify-content-center align-items-center">
           ${statusContent}
