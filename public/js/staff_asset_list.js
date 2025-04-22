@@ -15,21 +15,20 @@ document.addEventListener("DOMContentLoaded", function () {
     .then((items) => {
       items.forEach((item) => {
         const row = document.createElement("div");
-        row.className = "d-flex bg-light rounded shadow-sm p-3 mb-3 align-items-center w-100 min-vh-10";
-        row.style.height = "120px"; 
+        row.className = "d-flex bg-light rounded shadow-sm p-3 mb-3 align-items-center w-100";
         row.innerHTML = `
-          <div class="col-1 text-center fw-semibold">${item.id}</div>
-          <div class="col-1 d-flex justify-content-center">
-              <img src="/img/${item.image}" class="img-fluid rounded" style="width: 50px; height: auto;" alt="${item.name}">
+          <div class="col text-center fw-semibold">${item.id}</div>
+          <div class="col d-flex justify-content-center">
+              <img src="/img/${item.image}" class="img-fluid rounded" style="width: 150px; height: auto;" alt="${item.name}">
           </div>
-          <div class="col-2 text-center">${item.name}</div>
-          <div class="col-2 text-center">${item.quantity}</div>
-          <div class="col-2 text-center">
+          <div class="col text-center">${item.name}</div>
+          <div class="col text-center">${item.quantity}</div>
+          <div class="col text-center">
               <span class="badge border rounded-3 bg-transparent ${item.status === "Available" ? "text-success" : item.status === "Pending" ? "text-warning" : item.status === "Disable" ? "text-secondary" : "text-danger"}">
                 ${item.status}
               </span>
           </div>
-          <div class="col-4 text-center">
+          <div class="col text-center">
               <button class="btn btn-warning text-white edit-btn" data-id="${item.id}" data-name="${item.name}" data-status="${item.status}" data-quantity="${item.quantity}">
                 Edit
               </button>
